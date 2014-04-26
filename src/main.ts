@@ -15,7 +15,8 @@ class MainState extends Phaser.State {
 
 	trees:Phaser.TilemapLayer;
 	background:Phaser.TilemapLayer;
-	probes:Phaser.Group;
+
+	groups: {[key: string]: Phaser.Group} = {};
 
 	public preload():void {
 		this.load.spritesheet("player","assets/player.png",25,25,1,0,0);
@@ -49,11 +50,6 @@ class MainState extends Phaser.State {
 		this.game.add.existing(this.p);
 
 		this.camera.follow(this.p);
-
-		this.probes = this.game.add.group()
-		this.probes.create(50, 50, 'probe');
-
-		this.game.add.existing(this.probes);
 	}
 
 	public update():void {
@@ -75,6 +71,16 @@ class Entity extends Phaser.Sprite {
 		super(game, 0, 0, spritesheet, 0);
 
 		game.physics.enable(this, Phaser.Physics.ARCADE);
+
+		var superclassName:string = <string> (<any> this).constructor.name;
+		var currentState:MainState = (<MainState> game.state.getCurrentState());
+		if (!currentState.groups[superclassName]) {
+			var newGroup:Phaser.Group = game.add.group();
+			currentState.groups[superclassName] = newGroup;
+			this.game.add.existing(newGroup);
+		}
+
+		currentState.groups[superclassName].add(this);
 	}
 }
 
@@ -101,28 +107,37 @@ class DialogObserver {
 	}
 }
 
-class Probe {
+class Probe extends Entity {
 	dx:number = 0;
 	dy:number = 0;
 
 	static MAX_PROBES:number = 3;
 	static probesActive:number = 0;
 
-	static makeNewProbe(dx:number, dy:number=0):Probe {
+	static makeNewProbe(game:Phaser.Game, x:number, y:number, dx:number, dy:number=0):Probe {
 		if (Probe.probesActive >= Probe.MAX_PROBES) {
 			DialogObserver.signal(DialogObserver.NO_PROBES);
 
 			return null;
 		}
 
-		return new Probe(dx, dy, Probe.probesActive++);
+		var newProbe:Probe = new Probe(game, x, y, dx, dy, Probe.probesActive++);
+
+		(<MainState> game.state.getCurrentState()).probes.add(newProbe);
+
+		return newProbe;
 	}
 
-	constructor(dx:number, dy:number, probeId:number) {
-		this.dx = dx;
-		this.dy = dy;
+	constructor(game:Phaser.Game, x:number, y:number, dx:number, dy:number, probeId:number) {
+		super(game, "probe");
 
-		console.log("new Proble!" + probeId);
+		this.body.velocity.x = dx * 500;
+		this.body.velocity.y = dy * 500;
+
+		console.log("new Proble! " + probeId);
+
+		this.x = x;
+		this.y = y;
 	}
 }
 
@@ -141,7 +156,7 @@ class Player extends Entity {
 	fireProbe():void {
 		var dx = this.facing;
 
-		Probe.makeNewProbe(dx, 0);
+		Probe.makeNewProbe(this.game, this.x, this.y, dx, 0);
 	}
 
 	update():void {

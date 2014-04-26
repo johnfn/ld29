@@ -13,10 +13,16 @@ class MainState extends Phaser.State {
 	b:Phaser.TilemapLayer;
 	f:Phaser.TilemapLayer;
 
+	trees:Phaser.TilemapLayer;
+	background:Phaser.TilemapLayer;
+	probes:Phaser.Group;
+
 	public preload():void {
 		this.load.spritesheet("player","assets/player.png",25,25,1,0,0);
 		this.load.spritesheet("block","assets/block.png",25,25,1,0,0);
+		this.load.spritesheet("probe","assets/probe.png",25,25,1,0,0);
 		this.load.tilemap("map", "assets/map.json", null, Phaser.Tilemap.TILED_JSON);
+
 	}
 
 	public init():void {
@@ -27,17 +33,27 @@ class MainState extends Phaser.State {
 
 		this.game.world.setBounds(0, 0, MAP_WIDTH * 25, MAP_HEIGHT * 25);
 
-		this.p = new Player(this.game);
-		this.game.add.existing(this.p);
-
 		var tileset:Phaser.Tilemap = this.game.add.tilemap("map",25,25,30,30); // w,h, mapw, maph
 		tileset.addTilesetImage("main","block",25, 25);
 
 		tileset.setCollisionBetween(1,151,true,"collision");
+		this.background = tileset.createLayer("background-1");
 		this.b = tileset.createLayer("collision");
 		this.f = tileset.createLayer("filler");
+		this.trees = tileset.createLayer("tree");
+
+		this.p = new Player(this.game);
+		this.p.x = 50;
+		this.p.y = 50;
+
+		this.game.add.existing(this.p);
 
 		this.camera.follow(this.p);
+
+		this.probes = this.game.add.group()
+		this.probes.create(50, 50, 'probe');
+
+		this.game.add.existing(this.probes);
 	}
 
 	public update():void {
@@ -62,7 +78,57 @@ class Entity extends Phaser.Sprite {
 	}
 }
 
+class DialogObserver {
+	static NO_PROBES:number = 2;
+
+	static dialogs: {[key: number]: string[]; } = DialogObserver.dialog();
+
+	static dialog(): {[key:number]: string[]; } {
+		var dialogDict: {[key:number]: string[]; } = {};
+
+		dialogDict[1] = ["Dialog maybe works."];
+		dialogDict[DialogObserver.NO_PROBES] = ["No probles left."];
+
+		return dialogDict;
+	}
+
+	static signal(dialogID:number) {
+		if (!DialogObserver.dialogs[dialogID]) {
+			console.error("no dialog with " + dialogID + " found.");
+		}
+
+		console.log(DialogObserver.dialogs[dialogID]);
+	}
+}
+
+class Probe {
+	dx:number = 0;
+	dy:number = 0;
+
+	static MAX_PROBES:number = 3;
+	static probesActive:number = 0;
+
+	static makeNewProbe(dx:number, dy:number=0):Probe {
+		if (Probe.probesActive >= Probe.MAX_PROBES) {
+			DialogObserver.signal(DialogObserver.NO_PROBES);
+
+			return null;
+		}
+
+		return new Probe(dx, dy, Probe.probesActive++);
+	}
+
+	constructor(dx:number, dy:number, probeId:number) {
+		this.dx = dx;
+		this.dy = dy;
+
+		console.log("new Proble!" + probeId);
+	}
+}
+
 class Player extends Entity {
+	facing:number;
+
 	constructor(game:Phaser.Game) {
 		super(game, "player");
 
@@ -82,6 +148,18 @@ class Player extends Entity {
 			if (this.body.blocked.down) {
 				this.body.velocity.y = -500;
 			}
+		}
+
+		if (this.body.facing == Phaser.LEFT) {
+			this.facing = -1;
+		} else if (this.body.facing == Phaser.RIGHT) {
+			this.facing = 1;
+		}
+
+		if (keyboard.isDown(Phaser.Keyboard.Z)) {
+			var dx = this.facing;
+
+			Probe.makeNewProbe(dx, 0);
 		}
 	}
 }

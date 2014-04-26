@@ -1,0 +1,3 @@
+#!/bin/bash
+
+find . -name *.ts | xargs tsc -outDir js -t 'ES5' -w

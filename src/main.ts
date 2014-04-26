@@ -133,6 +133,15 @@ class Player extends Entity {
 		super(game, "player");
 
 		this.body.gravity = new Phaser.Point(0, 1600);
+
+		var fireButton = game.input.keyboard.addKey(Phaser.Keyboard.Z);
+		fireButton.onDown.add(this.fireProbe, this);
+	}
+
+	fireProbe():void {
+		var dx = this.facing;
+
+		Probe.makeNewProbe(dx, 0);
 	}
 
 	update():void {
@@ -154,12 +163,6 @@ class Player extends Entity {
 			this.facing = -1;
 		} else if (this.body.facing == Phaser.RIGHT) {
 			this.facing = 1;
-		}
-
-		if (keyboard.isDown(Phaser.Keyboard.Z)) {
-			var dx = this.facing;
-
-			Probe.makeNewProbe(dx, 0);
 		}
 	}
 }

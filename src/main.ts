@@ -60,8 +60,8 @@ class Player extends Entity {
 		}
 
 		if (keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-			if (this.body.touching.down) {
-				this.body.velocity.y = -1200;
+			if (this.body.blocked.down) {
+				this.body.velocity.y = -500;
 			}
 		}
 	}

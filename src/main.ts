@@ -11,6 +11,7 @@ var SCREEN_HEIGHT:number = MAP_HEIGHT * 25; // in px
 class MainState extends Phaser.State {
 	p:Player;
 	b:Phaser.TilemapLayer;
+	f:Phaser.TilemapLayer;
 
 	public preload():void {
 		this.load.spritesheet("player","assets/player.png",25,25,1,0,0);
@@ -34,6 +35,7 @@ class MainState extends Phaser.State {
 
 		tileset.setCollisionBetween(1,151,true,"collision");
 		this.b = tileset.createLayer("collision");
+		this.f = tileset.createLayer("filler");
 
 		this.camera.follow(this.p);
 	}

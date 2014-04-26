@@ -1,21 +1,27 @@
-/// <reference path="../bower_components/phaser/phaser.d.ts" /
+/// <reference path="../d/phaser.d.ts" />
 
-class Game {
-	game:Phaser.Game;
-	constructor() {
-		this.game = new Phaser.Game(this, 'mygame', 800, 480, init, create, update);
-
+class MainState extends Phaser.State {
+	public init():void {
 	}
 
-	private init():void {
-
-	}
-
-	private create():void {
+	public create():void {
 		
 	}
 
-	private update():void {
+	public update():void {
 		
 	}
 }
+
+class Game {
+	game:Phaser.Game;
+	state: Phaser.State;
+
+	constructor() {
+		this.state = new MainState();
+		this.game = new Phaser.Game(800, 600, Phaser.WEBGL, "main", this.state);
+	}
+
+}
+
+new Game();

@@ -11,9 +11,13 @@ LD29
 
  ☐ Get controls working solidly.
  ☐ Shoot a proble.
-   ☐ Need to have more refined collision typez.
-   ☐ Need gravity.
+   ✔ Need to have more refined collision typez. @done (14-04-26 13:30)
+   nope
+   ✔ Need gravity. @done (14-04-26 13:30)
  ☐ HUD for probes left.
+ ☐ Pick up probes on de ground.
+ ☐ Darkness and light...
+ ☐ Look into shadows for glowing...ness
  ☐ Different colored probles. :D via probeID
  ☐ Imagine probes looking sad the longer it's been since they've seen you. OH MY GOD.
  ☐ Dialog boxen.

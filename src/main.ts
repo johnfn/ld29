@@ -12,6 +12,7 @@ class MainState extends Phaser.State {
 	p:Player;
 	walls:Phaser.TilemapLayer;
 	f:Phaser.TilemapLayer;
+	hud:HUD;
 
 	trees:Phaser.TilemapLayer;
 	background:Phaser.TilemapLayer;
@@ -22,6 +23,7 @@ class MainState extends Phaser.State {
 		this.load.spritesheet("player","assets/player.png",25,25,1,0,0);
 		this.load.spritesheet("block","assets/block.png",25,25,1,0,0);
 		this.load.spritesheet("probe","assets/probe.png",25,25,1,0,0);
+		this.load.spritesheet("hud-probe","assets/hud-probe-indicator.png",25,25,1,0,0);
 		this.load.tilemap("map", "assets/map.json", null, Phaser.Tilemap.TILED_JSON);
 
 	}
@@ -50,6 +52,8 @@ class MainState extends Phaser.State {
 		this.game.add.existing(this.p);
 
 		this.camera.follow(this.p);
+
+		this.hud = new HUD(this.game);
 	}
 
 	public update():void {
@@ -158,6 +162,56 @@ class Probe extends Entity {
 		}
 	}
 }
+
+class ProbeIndicator extends Phaser.Sprite {
+	happinessLevel:number = 0;
+
+	constructor(game:Phaser.Game, which:number, happiness:number = 0) {
+		super(game, 25 + which * 30, 25, "hud-probe", happiness);
+
+		this.happinessLevel = happiness;
+	}
+}
+
+class ProbeList {
+	contents:Phaser.Group;
+	game:Phaser.Game;
+	probesOwned:number = 1;
+	orderedProbeList:ProbeIndicator[] = [];
+
+	constructor(game:Phaser.Game) {
+		this.game = game;
+
+		this.contents = game.add.group();
+		this.contents.fixedToCamera = true;
+		game.add.existing(this.contents);
+
+		for (var i = 0; i < 3; i++) {
+			var newIndicator = new ProbeIndicator(this.game, i, 0);
+
+			this.contents.add(newIndicator);
+			this.orderedProbeList.push(newIndicator);
+			newIndicator.visible = false;
+		}
+
+		for (var i = 0; i < this.probesOwned; i++) {
+			this.orderedProbeList[i].visible = true;
+		}
+	}
+}
+
+class HUD {
+	game:Phaser.Game;
+	probeList:ProbeList;
+
+	constructor(game:Phaser.Game) {
+		this.game = game;
+		this.probeList = new ProbeList(game);
+	}
+
+	addProbeIndicators() {
+	}
+} 
 
 class Player extends Entity {
 	facing:number;

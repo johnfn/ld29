@@ -2,9 +2,16 @@
 
 var keyboard:Phaser.Keyboard;
 
+var MAP_WIDTH:number = 50; // in tiles
+var MAP_HEIGHT:number = 50; // in tiles
+
+var SCREEN_WIDTH:number = MAP_WIDTH * 25; // in px
+var SCREEN_HEIGHT:number = MAP_HEIGHT * 25; // in px
+
 class MainState extends Phaser.State {
 	p:Player;
 	b:Phaser.TilemapLayer;
+
 	public preload():void {
 		this.load.spritesheet("player","assets/player.png",25,25,1,0,0);
 		this.load.spritesheet("block","assets/block.png",25,25,1,0,0);
@@ -17,6 +24,8 @@ class MainState extends Phaser.State {
 	public create():void {
 		keyboard = this.game.input.keyboard;
 
+		this.game.world.setBounds(0, 0, MAP_WIDTH * 25, MAP_HEIGHT * 25);
+
 		this.p = new Player(this.game);
 		this.game.add.existing(this.p);
 
@@ -25,10 +34,19 @@ class MainState extends Phaser.State {
 
 		tileset.setCollisionBetween(1,151,true,"collision");
 		this.b = tileset.createLayer("collision");
+
+		this.camera.follow(this.p);
 	}
 
 	public update():void {
 		this.game.physics.arcade.collide(this.p, this.b);
+
+		// set bounds to the proper screen
+
+		var mapX:number = Math.floor(this.p.x / SCREEN_WIDTH)  * SCREEN_WIDTH;
+		var mapY:number = Math.floor(this.p.y / SCREEN_HEIGHT) * SCREEN_HEIGHT;
+
+		this.game.world.setBounds(mapX, mapY, SCREEN_WIDTH, SCREEN_HEIGHT);
 	}
 }
 
@@ -46,9 +64,8 @@ class Player extends Entity {
 	constructor(game:Phaser.Game) {
 		super(game, "player");
 
-		this.body.gravity = new Phaser.Point(0, 1600);
+		//this.body.gravity = new Phaser.Point(0, 1600);
 	}
-
 
 	update():void {
 		if (keyboard.isDown(Phaser.Keyboard.LEFT)) {

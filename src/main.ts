@@ -64,7 +64,7 @@ class Player extends Entity {
 	constructor(game:Phaser.Game) {
 		super(game, "player");
 
-		//this.body.gravity = new Phaser.Point(0, 1600);
+		this.body.gravity = new Phaser.Point(0, 1600);
 	}
 
 	update():void {

@@ -23,7 +23,7 @@ class MainState extends Phaser.State {
 		this.load.spritesheet("player","assets/player.png",25,25,1,0,0);
 		this.load.spritesheet("block","assets/block.png",25,25,1,0,0);
 		this.load.spritesheet("probe","assets/probe.png",25,25,1,0,0);
-		this.load.spritesheet("hud-probe","assets/hud-probe-indicator.png",25,25,1,0,0);
+		this.load.spritesheet("hud-probe","assets/hud-probe-indicator.png",25,25,4,0,0);
 		this.load.tilemap("map", "assets/map.json", null, Phaser.Tilemap.TILED_JSON);
 
 	}
@@ -164,6 +164,11 @@ class Probe extends Entity {
 }
 
 class ProbeIndicator extends Phaser.Sprite {
+	static HAPPY:number = 0;
+	static OK:number = 1;
+	static SAD:number = 2;
+	static HIDDEN:number = 3;
+
 	happinessLevel:number = 0;
 
 	constructor(game:Phaser.Game, which:number, happiness:number = 0) {
@@ -187,7 +192,7 @@ class ProbeList {
 		game.add.existing(this.contents);
 
 		for (var i = 0; i < 3; i++) {
-			var newIndicator = new ProbeIndicator(this.game, i, 0);
+			var newIndicator = new ProbeIndicator(this.game, i, ProbeIndicator.HIDDEN);
 
 			this.contents.add(newIndicator);
 			this.orderedProbeList.push(newIndicator);

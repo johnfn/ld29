@@ -10,7 +10,7 @@ var SCREEN_HEIGHT:number = MAP_HEIGHT * 25; // in px
 
 class MainState extends Phaser.State {
 	p:Player;
-	b:Phaser.TilemapLayer;
+	walls:Phaser.TilemapLayer;
 	f:Phaser.TilemapLayer;
 
 	trees:Phaser.TilemapLayer;
@@ -39,7 +39,7 @@ class MainState extends Phaser.State {
 
 		tileset.setCollisionBetween(1,151,true,"collision");
 		this.background = tileset.createLayer("background-1");
-		this.b = tileset.createLayer("collision");
+		this.walls = tileset.createLayer("collision");
 		this.f = tileset.createLayer("filler");
 		this.trees = tileset.createLayer("tree");
 
@@ -53,7 +53,11 @@ class MainState extends Phaser.State {
 	}
 
 	public update():void {
-		this.game.physics.arcade.collide(this.p, this.b);
+		this.game.physics.arcade.collide(this.p, this.walls);
+
+		if (this.groups["Probe"]) {
+			this.game.physics.arcade.collide(this.walls, this.groups["Probe"]);
+		}
 
 		// set bounds to the proper screen
 
@@ -121,23 +125,37 @@ class Probe extends Entity {
 			return null;
 		}
 
-		var newProbe:Probe = new Probe(game, x, y, dx, dy, Probe.probesActive++);
-
-		(<MainState> game.state.getCurrentState()).probes.add(newProbe);
-
-		return newProbe;
+		return new Probe(game, x, y, dx, dy, Probe.probesActive++);
 	}
 
 	constructor(game:Phaser.Game, x:number, y:number, dx:number, dy:number, probeId:number) {
 		super(game, "probe");
 
-		this.body.velocity.x = dx * 500;
-		this.body.velocity.y = dy * 500;
+		this.body.allowGravity = true;
+
+		this.body.gravity.x = 0;
+		this.body.gravity.y = 200;
+
+		this.body.bounce.y = .3;
+		this.body.bounce.x = .3;
+
+		this.body.velocity.x = dx * 200;
+		this.body.velocity.y = -100 + dy * 500;
 
 		console.log("new Proble! " + probeId);
 
 		this.x = x;
 		this.y = y;
+	}
+
+	update() {
+		if (this.body.blocked.down) {
+			this.body.velocity.x *= .9;
+
+			if (Math.abs(this.body.velocity.x) < 5) {
+				this.body.velocity.x = 0;
+			}
+		}
 	}
 }
 

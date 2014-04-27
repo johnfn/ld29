@@ -11,11 +11,13 @@ LD29
  ☐ Get controls working solidly.
  ✔ Darkness crashes when ppl go off side. @done (14-04-27 11:39)
  ✔ Darkness needs to work for levels aside from the first one. @done (14-04-27 12:59)
+ ☐ Dialog when entering rooms.
  ☐ 3 different probes
    ☐ Normal derpy one
    ☐ 4-arrow flying one
  ✔ Can't jump when wall on right side. @done (14-04-27 13:00)
- ☐ Reset all probes into inventory.
+ ☐ If stuck, reset all probes into inventory.
+ ☐ Probes are occasionally jittery.
  ✔ You collide with invisible probes... @done (14-04-27 13:06)
  ☐ Blur darkness
  ☐ Particles. Pushin phaser to da max!!!

@@ -24,6 +24,8 @@ class MainState extends Phaser.State {
 	mapX:number = -1;
 	mapY:number = -1;
 
+	mapsIveSeen: {[key: string]: boolean} = {};
+
 	groups: {[key: string]: Phaser.Group} = {};
 
 	static getMainState(game:Phaser.Game):MainState {
@@ -100,8 +102,11 @@ class MainState extends Phaser.State {
 
 		// set bounds to the proper screen
 
-		var newMapX:number = Math.floor(this.p.x / SCREEN_WIDTH)  * SCREEN_WIDTH;
-		var newMapY:number = Math.floor(this.p.y / SCREEN_HEIGHT) * SCREEN_HEIGHT;
+		var relMapX = Math.floor(this.p.x / SCREEN_WIDTH);
+		var relMapY = Math.floor(this.p.y / SCREEN_HEIGHT);
+
+		var newMapX:number = relMapX * SCREEN_WIDTH;
+		var newMapY:number = relMapY * SCREEN_HEIGHT;
 
 		if (newMapX != this.mapX || newMapY != this.mapY) {
 			this.mapX = newMapX;
@@ -109,6 +114,14 @@ class MainState extends Phaser.State {
 
 			this.game.world.setBounds(newMapX, newMapY, SCREEN_WIDTH, SCREEN_HEIGHT);
 			Darkness.adjustCamera(newMapX, newMapY);
+
+			var key:string = relMapX + "," + relMapY;
+
+			if (! (key in this.mapsIveSeen)) {
+				this.mapsIveSeen[key] = true;
+
+				DialogObserver.newMap(this.game, key);
+			}
 		}
 		this.d.update();
 
@@ -257,8 +270,10 @@ class Darkness {
 	}
 
 	raycastAround(target:Phaser.Sprite, radius:number = 100) {
-		for (var i = target.x - radius; i < target.x + radius; i += 25){
-			for (var j = target.y - radius; j < target.y + radius; j += 25) {
+		var x:number = Math.floor(target.x / 2) * 2;
+		var y:number = Math.floor(target.y / 2) * 2;
+		for (var i = x - radius; i < x + radius; i += 25){
+			for (var j = y - radius; j < y + radius; j += 25) {
 				var cell = this.xyToCell(i, j);
 				if (cell) {
 					cell.off();
@@ -432,6 +447,13 @@ class DialogObserver {
 	static NO_PROBES:number = 2;
 
 	static dialogs: {[key: number]: string[]; } = DialogObserver.dialog();
+	static mapd: {[key: string]: string[]; } = DialogObserver.mapdialogs();
+
+	static mapdialogs(): {[key: string]: string[]; } {
+		return { "0,0" : ["I'm the best robot ever!"]
+			   , "1,0": ["The right is too dark. I guess the only way to go is down!"]
+		};
+	}
 
 	static dialog(): {[key:number]: string[]; } {
 		var dialogDict: {[key:number]: string[]; } = {};
@@ -440,6 +462,15 @@ class DialogObserver {
 		dialogDict[DialogObserver.NO_PROBES] = ["No probles left.", ":("];
 
 		return dialogDict;
+	}
+
+	static newMap(game:Phaser.Game, id:string) {
+		console.log(id);
+
+		if (id in DialogObserver.mapd) {
+			var d:DialogBox = new DialogBox(game, DialogObserver.mapd[id].slice(0));
+			game.add.existing(d);
+		}
 	}
 
 	static signal(game:Phaser.Game, dialogID:number) {

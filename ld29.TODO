@@ -29,7 +29,8 @@ LD29
     ✔ It's annoying code-wise that you can drop and pickup probles. @done (14-04-26 20:18)
     ✔ Refactor: Probes need to always exist, they just need to have a 'non-deployed' state. @done (14-04-26 20:18)
  ☐ Pick up probes on de ground.
- ☐ Switch back to robot.
+ ✔ For some reason zzz turned into C... lol wut. Oh lol i changed the asset. @done (14-04-26 20:36)
+ ✔ Switch back to robot. @done (14-04-26 20:32)
  ☐ Probles need to collide with each other.
  ✔ Probles randomly don't shoot. @done (14-04-26 20:19)
  ☐ 

@@ -72,7 +72,11 @@ class MainState extends Phaser.State {
 		this.camera.follow(this.currentFocus);
 
 		if (this.groups["Probe"]) {
-			this.game.physics.arcade.collide(this.walls, this.groups["Probe"]);
+			var probes:Phaser.Group = this.groups["Probe"]
+
+			this.game.physics.arcade.collide(this.walls, probes);
+			this.game.physics.arcade.collide(probes, probes);
+			this.game.physics.arcade.collide(this.p, probes);
 		}
 
 		// set bounds to the proper screen
@@ -94,7 +98,7 @@ class MainState extends Phaser.State {
 			if (this.game.input.keyboard.isDown(keyToProbleIdx[i])) {
 				var probe:Probe = this.hud.probeList.getProble(i);
 
-				if (probe) {
+				if (probe && !probe.inInventory) {
 					this.currentFocus = probe;
 
 					return;
@@ -208,8 +212,8 @@ class DialogObserver {
 }
 
 class Probe extends Entity {
-	dx:number = 0;
-	dy:number = 0;
+	private dx:number = 0;
+	private dy:number = 0;
 	energy:number = 100;
 	inInventory:boolean = true;
 
@@ -249,13 +253,20 @@ class Probe extends Entity {
 		this.body.bounce.y = .3;
 		this.body.bounce.x = .3;
 
-		this.body.velocity.x = dx * 200;
-		this.body.velocity.y = -100 + dy * 500;
+		this.setd(dx, dy);
 
 		this.x = x;
 		this.y = y;
 
 		MainState.getMainState(game).hud.signal(HUD.NEW_PROBLE, this);
+	}
+
+	setd(dx:number, dy:number) {
+		this.dx = dx;
+		this.dy = dy;
+
+		this.body.velocity.x = dx * 200;
+		this.body.velocity.y = -100 + dy * 500;
 	}
 
 	update() {
@@ -462,8 +473,7 @@ class Player extends Entity {
 
 		p.x = this.x;
 		p.y = this.y;
-		p.dx = this.facing;
-		p.dy = 0;
+		p.setd(this.facing, 0);
 	}
 
 	update():void {

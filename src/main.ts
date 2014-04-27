@@ -221,6 +221,27 @@ class Probe extends Entity {
 	static MAX_PROBES:number = 3;
 	static probesActive:number = 0;
 
+	static nearbyProbesTo(s:Phaser.Sprite):Probe[] {
+		var pickedUp:boolean = false;
+		var result:Probe[] = [];
+
+		// see if we can find a probe to pick up first.
+
+		for (var i = 0; i < Probe.existingProbes.length; i++) {
+			var p:Probe = Probe.existingProbes[i];
+
+			if (p.inInventory) continue;
+
+			var dist:number = Phaser.Math.distance(s.x, s.y, p.x, p.y);
+
+			if (dist < 50) {
+				result.push(p);
+			}
+		}
+
+		return result;
+	}
+
 	static addProbeToInventory(game:Phaser.Game, x:number, y:number, dx:number, dy:number=0):Probe {
 		var p:Probe = new Probe(game, x, y, dx, dy, Probe.probesActive++);
 
@@ -240,6 +261,10 @@ class Probe extends Entity {
 		DialogObserver.signal(game, DialogObserver.NO_PROBES);
 
 		return null;
+	}
+
+	pickup() {
+		this.inInventory = true;
 	}
 
 	constructor(game:Phaser.Game, x:number, y:number, dx:number, dy:number, probeId:number) {
@@ -427,6 +452,7 @@ class HUD {
 	game:Phaser.Game;
 	probeList:ProbeList;
 	youIndicator:YouIndicator;
+	zHint:Phaser.Text;
 
 	static NEW_PROBLE:number = 0;
 
@@ -434,6 +460,10 @@ class HUD {
 		this.game = game;
 		this.probeList = new ProbeList(game);
 		this.youIndicator = new YouIndicator(game);
+
+		this.zHint = new Phaser.Text(game, 25, 60, "Z: Die.", {fill: "#ffffff", font: "15px Arial"});
+		this.zHint.fixedToCamera = true;
+		this.game.add.existing(this.zHint);
 	}
 
 	signal(val:number, extra:any) {
@@ -444,6 +474,12 @@ class HUD {
 
 	update() {
 		this.probeList.update();
+
+		if (Probe.nearbyProbesTo(MainState.getMainState(this.game).p).length > 0) {
+			this.zHint.text = "Z: Pick up probe.";
+		} else {
+			this.zHint.text = "Z: Shoot probe.";
+		}
 	}
 
 	addProbeIndicators() {
@@ -465,24 +501,13 @@ class Player extends Entity {
 
 	fireProbe():void {
 		var dx = this.facing;
-		var pickedUp:boolean = false;
+		var nearProbes:Probe[] = Probe.nearbyProbesTo(this);
 
-		// see if we can find a probe to pick up first.
-
-		for (var i = 0; i < Probe.existingProbes.length; i++) {
-			var p:Probe = Probe.existingProbes[i];
-
-			if (p.inInventory) continue;
-
-			var dist:number = Phaser.Math.distance(this.x, this.y, p.x, p.y);
-
-			if (dist < 50) {
-				p.inInventory = true;
-				pickedUp = true;
-			}
+		for (var i = 0; i < nearProbes.length; i++) {
+			nearProbes[i].pickup();
 		}
 
-		if (pickedUp) return; // either pick up or shoot, not both.
+		if (nearProbes.length > 0) return; // either pick up or shoot, not both.
 
 		var p:Probe = Probe.findProbeToShoot(this.game);
 		if (!p) return;

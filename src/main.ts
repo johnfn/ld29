@@ -61,8 +61,8 @@ class MainState extends Phaser.State {
 		this.p.y = 50;
 
 		this.game.add.existing(this.p);
-
 		this.hud = new HUD(this.game);
+
 		this.currentFocus = this.p;
 	}
 
@@ -200,18 +200,31 @@ class Probe extends Entity {
 	dx:number = 0;
 	dy:number = 0;
 	energy:number = 100;
+	inInventory:boolean = true;
 
+	static existingProbes:Probe[] = [];
 	static MAX_PROBES:number = 3;
 	static probesActive:number = 0;
 
-	static makeNewProbe(game:Phaser.Game, x:number, y:number, dx:number, dy:number=0):Probe {
-		if (Probe.probesActive >= Probe.MAX_PROBES) {
-			DialogObserver.signal(game, DialogObserver.NO_PROBES);
+	static addProbeToInventory(game:Phaser.Game, x:number, y:number, dx:number, dy:number=0):Probe {
+		var p:Probe = new Probe(game, x, y, dx, dy, Probe.probesActive++);
 
-			return null;
+		Probe.existingProbes.push(p);
+		return p;
+	}
+
+	static findProbeToShoot(game:Phaser.Game) {
+		for (var i = 0; i < Probe.existingProbes.length; i++) {
+			if (Probe.existingProbes[i].inInventory) {
+				var result:Probe = Probe.existingProbes[i];
+				result.visible = true;
+				return result;
+			}
 		}
 
-		return new Probe(game, x, y, dx, dy, Probe.probesActive++);
+		DialogObserver.signal(game, DialogObserver.NO_PROBES);
+
+		return null;
 	}
 
 	constructor(game:Phaser.Game, x:number, y:number, dx:number, dy:number, probeId:number) {
@@ -235,6 +248,12 @@ class Probe extends Entity {
 	}
 
 	update() {
+		this.visible = !this.inInventory;
+
+		if (this.inInventory) {
+			return;
+		}
+
 		if (this.body.blocked.down) {
 			this.body.velocity.x *= .9;
 
@@ -312,13 +331,18 @@ class ProbeIndicator extends Phaser.Sprite {
 	}
 
 	update() {
-		if (this.probe) { // TODO refactor
-			this.msg.visible = this.happinessLevel != ProbeIndicator.HIDDEN;
-			this.energybar.setValue(this.probe.energy);
+		this.msg.visible = !this.probe.inInventory;
+		this.energybar.visible = !this.probe.inInventory;
+		this.energybar.setValue(this.probe.energy);
 
-			if (this.probe.energy <= 0) {
-				this.msg.loadTexture("hud-msg-zzz", 0);
-			}
+		if (this.probe.inInventory) {
+			this.frame = 3;
+		} else {
+			this.frame = 0;
+		}
+
+		if (this.probe.energy <= 0) {
+			this.msg.loadTexture("hud-msg-zzz", 0);
 		}
 	}
 }
@@ -336,23 +360,15 @@ class ProbeList {
 		this.contents = game.add.group();
 		this.contents.fixedToCamera = true;
 		game.add.existing(this.contents);
-
-		for (var i = 0; i < 3; i++) {
-			var newIndicator = new ProbeIndicator(this.game, i, ProbeIndicator.HIDDEN);
-
-			this.contents.add(newIndicator);
-			this.orderedProbeList.push(newIndicator);
-			newIndicator.visible = false;
-		}
-
-		for (var i = 0; i < this.probesOwned; i++) {
-			this.orderedProbeList[i].visible = true;
-		}
 	}
 
 	addAliveProble(newProbe:Probe) {
-		this.orderedProbeList[this.probesActive].happinessLevel = ProbeIndicator.HAPPY;
-		this.orderedProbeList[this.probesActive].frame = ProbeIndicator.HAPPY;
+		var newIndicator = new ProbeIndicator(this.game, this.probesActive, ProbeIndicator.HIDDEN);
+
+		this.contents.add(newIndicator);
+		this.orderedProbeList.push(newIndicator);
+		newIndicator.visible = true;
+
 		this.orderedProbeList[this.probesActive].probe = newProbe;
 	}
 
@@ -394,6 +410,7 @@ class HUD {
 
 class Player extends Entity {
 	facing:number;
+	numStartingProbles:number = 1;
 
 	constructor(game:Phaser.Game) {
 		super(game, "player");
@@ -402,15 +419,29 @@ class Player extends Entity {
 
 		var fireButton = game.input.keyboard.addKey(Phaser.Keyboard.Z);
 		fireButton.onDown.add(this.fireProbe, this);
+
 	}
 
 	fireProbe():void {
 		var dx = this.facing;
 
-		Probe.makeNewProbe(this.game, this.x, this.y, dx, 0);
+		var p:Probe = Probe.findProbeToShoot(this.game);
+		if (!p) return;
+
+		p.inInventory = false;
+
+		p.x = this.x;
+		p.y = this.y;
+		p.dx = this.facing;
+		p.dy = 0;
 	}
 
 	update():void {
+		for (var i = 0 ; i < this.numStartingProbles; i++) {
+			Probe.addProbeToInventory(this.game, this.x, this.y, 0, 0);
+		}
+		this.numStartingProbles = 0;
+
 		if (MainState.getMainState(this.game).currentFocus != this) return;
 
 		if (keyboard.isDown(Phaser.Keyboard.LEFT)) {

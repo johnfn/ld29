@@ -34,6 +34,7 @@ class MainState extends Phaser.State {
 		this.load.spritesheet("probe","assets/probe.png",25,25,1,0,0);
 		this.load.spritesheet("hud-probe","assets/hud-probe-indicator.png",25,25,5,0,0);
 		this.load.spritesheet("bw","assets/bw.png",25,25,2,0,0);
+		this.load.spritesheet("light","assets/light.png",25,25,1,0,0);
 		this.load.image("energybar", "assets/energybar.png");
 		this.load.image("target", "assets/target.png");
 		this.load.image("hud-msg-a","assets/msgA.png");
@@ -60,6 +61,8 @@ class MainState extends Phaser.State {
 		this.walls = tileset.createLayer("collision");
 		this.f = tileset.createLayer("filler");
 		this.trees = tileset.createLayer("tree");
+
+		tileset.createFromObjects("light", 5, "light", 0, true, true, this.game.world, Light);
 
 		this.p = new Player(this.game);
 		this.p.x = 50;
@@ -125,9 +128,18 @@ class MainState extends Phaser.State {
 	}
 }
 
+class Light extends Phaser.Sprite {
+	constructor(a, b, c, d, e) {
+		super(a, b, c, d, e);
+
+		Darkness.addLight(this);
+	}
+}
+
 class Darkness extends Phaser.Group {
 	game:Phaser.Game;
 	cells:Phaser.Sprite[][];
+	static staticLighbearer:Phaser.Sprite[] = [];
 	static lightbearers:Probe[] = [];
 	static player:Player;
 	static walls:Phaser.TilemapLayer;
@@ -154,6 +166,10 @@ class Darkness extends Phaser.Group {
 		Darkness.lightbearers.push(bearer);
 	}
 
+	static addLight(light:Phaser.Sprite) {
+		Darkness.staticLighbearer.push(light);
+	}
+
 	static addPlayer(player:Player) {
 		Darkness.player = player;
 	}
@@ -162,7 +178,7 @@ class Darkness extends Phaser.Group {
 		var i = Math.floor(x / 25);
 		var j = Math.floor(y / 25);
 
-		if (i > 0 && j > 0) return this.cells[i][j];
+		if (i >= 0 && j >= 0) return this.cells[i][j];
 		return null;
 	}
 
@@ -193,6 +209,12 @@ class Darkness extends Phaser.Group {
 			if (!p.inInventory) {
 				this.raycastAround(Darkness.lightbearers[i]);
 			}
+		}
+
+		for (var i = 0; i < Darkness.staticLighbearer.length; i++) {
+			var l:Phaser.Sprite = Darkness.staticLighbearer[i];
+
+			this.raycastAround(l, 150);
 		}
 	}
 }

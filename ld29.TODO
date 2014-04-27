@@ -10,15 +10,15 @@ LD29
 
  ☐ Get controls working solidly.
  ✔ Darkness crashes when ppl go off side. @done (14-04-27 11:39)
- ☐ Darkness needs to work for levels aside from the first one. 
+ ✔ Darkness needs to work for levels aside from the first one. @done (14-04-27 12:59)
  ☐ 3 different probes
    ☐ Normal derpy one
    ☐ 4-arrow flying one
- ☐ Can't jump when wall on right side.
+ ✔ Can't jump when wall on right side. @done (14-04-27 13:00)
  ☐ You collide with invisible probes...
  ☐ Blur darkness
  ☐ Particles. Pushin phaser to da max!!!
- ☐ Can't go back a level??? :x 
+ ✔ Can't go back a level??? :x @done (14-04-27 13:00)
  ☐ Can't jump on top of probes. Or literally any other thing in the game, except walls.
    ☐ Block all other events for dialog.
    ☐ Needs better font...

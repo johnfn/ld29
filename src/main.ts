@@ -548,7 +548,7 @@ class Probe extends Entity {
 			return;
 		}
 
-		if (this.body.blocked.down) {
+		if (this.body.blocked.down || this.body.touching.down) {
 			this.body.velocity.x *= .8;
 
 			if (Math.abs(this.body.velocity.x) < 5) {
@@ -787,7 +787,7 @@ class Player extends Entity {
 		}
 
 		if (keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-			if (this.body.blocked.down) {
+			if (this.body.blocked.down || this.body.touching.down) {
 				this.body.velocity.y = -500;
 			}
 		}

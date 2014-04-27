@@ -489,6 +489,7 @@ class Probe extends Entity {
 	static addProbeToInventory(game:Phaser.Game, x:number, y:number, dx:number, dy:number=0):Probe {
 		var p:Probe = new Probe(game, x, y, dx, dy, Probe.probesActive++);
 
+		p.exists = false;
 		Probe.existingProbes.push(p);
 		Darkness.addProbe(p);
 		return p;
@@ -498,7 +499,7 @@ class Probe extends Entity {
 		for (var i = 0; i < Probe.existingProbes.length; i++) {
 			if (Probe.existingProbes[i].inInventory) {
 				var result:Probe = Probe.existingProbes[i];
-				result.visible = true;
+				result.exists = true;
 				return result;
 			}
 		}
@@ -510,6 +511,7 @@ class Probe extends Entity {
 
 	pickup() {
 		this.inInventory = true;
+		this.exists = false;
 	}
 
 	constructor(game:Phaser.Game, x:number, y:number, dx:number, dy:number, probeId:number) {

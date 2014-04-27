@@ -15,11 +15,12 @@ LD29
    ☐ Normal derpy one
    ☐ 4-arrow flying one
  ✔ Can't jump when wall on right side. @done (14-04-27 13:00)
- ☐ You collide with invisible probes...
+ ☐ Reset all probes into inventory.
+ ✔ You collide with invisible probes... @done (14-04-27 13:06)
  ☐ Blur darkness
  ☐ Particles. Pushin phaser to da max!!!
  ✔ Can't go back a level??? :x @done (14-04-27 13:00)
- ☐ Can't jump on top of probes. Or literally any other thing in the game, except walls.
+ ✔ Can't jump on top of probes. Or literally any other thing in the game, except walls. @done (14-04-27 13:01)
    ☐ Block all other events for dialog.
    ☐ Needs better font...
        ☐ And make cute noises :3 
@@ -30,6 +31,7 @@ LD29
           ☐ Better than all these, scanlines.
           ☐ And a little static.
  ☐ Probe icon should be sleepy too.
+ ☐ When you insta-get a probe after tossing, should remove followtext also.
  ☐ HUD on top of darkness.
  ☐ Moving darkness amts. like with flickering torches...
  ☐ Camera easing.

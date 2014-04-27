@@ -291,7 +291,7 @@ class Darkness {
 			}
 		}
 
-		// this.raycastAround(Darkness.player);
+		var playerHasAtLeastOneProbe:boolean = false;
 
 		for (var i = 0; i < Darkness.lightbearers.length; i++) {
 			var p:Probe = Darkness.lightbearers[i];
@@ -299,7 +299,13 @@ class Darkness {
 				if (this.game.world.bounds.contains(p.x, p.y)) {
 					this.raycastAround(Darkness.lightbearers[i]);
 				}
+			} else {
+				playerHasAtLeastOneProbe = true;
 			}
+		}
+
+		if (playerHasAtLeastOneProbe) {
+			this.raycastAround(Darkness.player);
 		}
 
 		for (var i = 0; i < Darkness.staticLightbearer.length; i++) {

@@ -9,29 +9,21 @@ LD29
    ☐ Game where you can send out little fire probes that will illuminate torches. You can go pick them up and re-ammo yourself. Also, they have rudimentary controls ,l/r for like 50 energy. When you switch into ones perspective you get like b/w stuff.
 
  ☐ Get controls working solidly.
- ☐ Fix probe pickup.
- ☐ HUD should only say "C" if you're not focued on him. 
- ✔ Darkness crashes when ppl go off side. @done (14-04-27 11:39)
- ✔ Darkness needs to work for levels aside from the first one. @done (14-04-27 12:59)
- ✔ Dialog when entering rooms. @done (14-04-27 13:22)
+ ☐ Find probes! Story!
+ ☐ Carrying a probe gives you a light source.
  ☐ 3 different probes
    ☐ Normal derpy one
    ☐ 4-arrow flying one
- ✔ Can't jump when wall on right side. @done (14-04-27 13:00)
  ☐ If stuck, reset all probes into inventory.
- ☐ Probes are occasionally jittery.
- ✔ You collide with invisible probes... @done (14-04-27 13:06)
  ☐ Blur darkness
  ☐ Particles. Pushin phaser to da max!!!
- ✔ Can't go back a level??? :x @done (14-04-27 13:00)
- ✔ Can't jump on top of probes. Or literally any other thing in the game, except walls. @done (14-04-27 13:01)
+ ☐ Probes are occasionally jittery.
    ☐ Block all other events for dialog.
    ☐ Needs better font...
        ☐ And make cute noises :3 
        ☐ When you focus on one, gray colors: 
           https://github.com/photonstorm/phaser-examples/blob/master/filters/Gray.js
 
-          ✔ Could even have limited sight!!! @done (14-04-27 09:18)
           ☐ Better than all these, scanlines.
           ☐ And a little static.
  ☐ Probe icon should be sleepy too.
@@ -62,6 +54,16 @@ LD29
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Fix probe pickup. @done (14-04-27 13:53)
+ ✔ HUD should only say "C" if you're not focued on him. @done (14-04-27 13:53)
+ ✔ Darkness crashes when ppl go off side. @done (14-04-27 11:39)
+ ✔ Darkness needs to work for levels aside from the first one. @done (14-04-27 12:59)
+ ✔ Dialog when entering rooms. @done (14-04-27 13:22)
+ ✔ Can't jump when wall on right side. @done (14-04-27 13:00)
+ ✔ You collide with invisible probes... @done (14-04-27 13:06)
+ ✔ Can't go back a level??? :x @done (14-04-27 13:00)
+ ✔ Can't jump on top of probes. Or literally any other thing in the game, except walls. @done (14-04-27 13:01)
+ ✔ Could even have limited sight!!! @done (14-04-27 09:18)
  ✔ Shoot a proble. @done (14-04-26 18:14)
  ✔ Need to have more refined collision typez. @done (14-04-26 13:30)
   nope

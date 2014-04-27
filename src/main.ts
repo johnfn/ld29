@@ -35,6 +35,7 @@ class MainState extends Phaser.State {
 		this.load.image("hud-msg-a","assets/msgA.png");
 		this.load.image("hud-msg-s","assets/msgS.png");
 		this.load.image("hud-msg-d","assets/msgD.png");
+		this.load.image("hud-msg-zzz","assets/msgZZZ.png");
 		this.load.tilemap("map", "assets/map.json", null, Phaser.Tilemap.TILED_JSON);
 	}
 
@@ -275,7 +276,7 @@ class Bar extends Phaser.Sprite {
 				this.visible = false;
 				return;
 			}
-			
+
 			this.visible = true;
 			this.barValue = width;
 			var cropWidth = (Bar.BAR_WIDTH * (this.barValue / this.barMaxValue));
@@ -314,6 +315,10 @@ class ProbeIndicator extends Phaser.Sprite {
 		if (this.probe) { // TODO refactor
 			this.msg.visible = this.happinessLevel != ProbeIndicator.HIDDEN;
 			this.energybar.setValue(this.probe.energy);
+
+			if (this.probe.energy <= 0) {
+				this.msg.loadTexture("hud-msg-zzz", 0);
+			}
 		}
 	}
 }

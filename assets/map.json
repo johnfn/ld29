@@ -61,7 +61,22 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":450,
+                 "x":300,
+                 "y":425
+                }, 
+                {
+                 "gid":5,
+                 "height":0,
+                 "name":"",
+                 "properties":
+                    {
+
+                    },
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":75,
                  "y":400
                 }],
          "opacity":1,

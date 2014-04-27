@@ -66,7 +66,7 @@ class MainState extends Phaser.State {
 
 		this.p = new Player(this.game);
 		this.p.x = 50;
-		this.p.y = 50;
+		this.p.y = 250;
 
 		this.game.add.existing(this.p);
 
@@ -84,6 +84,7 @@ class MainState extends Phaser.State {
 
 	public update():void {
 		this.game.physics.arcade.collide(this.p, this.walls);
+		this.game.physics.arcade.collide(this.p, Darkness.collideGroup);
 		this.camera.follow(this.currentFocus, Phaser.Camera.FOLLOW_PLATFORMER);
 
 		if (this.groups["Probe"]) {
@@ -139,12 +140,15 @@ class Light extends Phaser.Sprite {
 class Cell extends Phaser.Sprite {
 	container:Phaser.Group;
 	isOn:boolean = true;
+	body:Phaser.Physics.Arcade.Body;
 
 	constructor(game:Phaser.Game, container:Phaser.Group) {
 		super(game, 0, 0, "bw", 0);
 
+		game.physics.enable(this, Phaser.Physics.ARCADE);
 		this.container = container;
 		this.container.add(this);
+		this.body.immovable = true;
 	}
 
 	// collision off, light on. 
@@ -235,7 +239,7 @@ class Darkness {
 			}
 		}
 
-		this.raycastAround(Darkness.player);
+		// this.raycastAround(Darkness.player);
 
 		for (var i = 0; i < Darkness.lightbearers.length; i++) {
 			var p:Probe = Darkness.lightbearers[i];

@@ -145,6 +145,37 @@ class Target extends Phaser.Sprite {
 	}
 }
 
+class FollowText extends Phaser.Text {
+	follow:Phaser.Sprite;
+	fullText:string = "";
+	ticks:number = 0;
+
+	constructor(game:Phaser.Game, follow:Phaser.Sprite, content:string) {
+		super(game, 0, 0, "", {fill: "#ffffff", font: "15px Arial"});
+
+		this.follow = follow;
+		this.fullText = content + "        "; // pad it out to make it display longer. haxhaxhax
+
+		this.game.add.existing(this);
+
+		this.setShadow(3, 3, 'rgba(0,0,0,1)',0);
+	}
+
+	update() {
+		this.x = this.follow.x;
+		this.y = this.follow.y - 15;
+		this.ticks++;
+
+		if (this.ticks % 6 == 0) {
+			if (this.text.length >= this.fullText.length) {
+				this.destroy();
+			} else {
+				this.text += this.fullText[this.text.length - 1]; //no idea why -1 is reuired.
+			}
+		}
+	}
+}
+
 class Entity extends Phaser.Sprite {
 	body:Phaser.Physics.Arcade.Body;
 
@@ -550,6 +581,9 @@ class Player extends Entity {
 		p.x = this.x;
 		p.y = this.y;
 		p.setd(this.facing, 0);
+
+		var cuteSayings:string[] = ["wheeee!", "into the darkness!", "it's nice to find friends down here!", "this is fun!", ":3     ", ":D     ", "yay!", "thanks for finding me!", "together, we can do it!"];
+ 		new FollowText(this.game, p, cuteSayings[Math.floor(Math.random() * cuteSayings.length)]);
 	}
 
 	update():void {

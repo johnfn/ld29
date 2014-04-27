@@ -17,6 +17,8 @@ class MainState extends Phaser.State {
 	trees:Phaser.TilemapLayer;
 	background:Phaser.TilemapLayer;
 
+	currentFocus:Entity;
+
 	groups: {[key: string]: Phaser.Group} = {};
 
 	static getMainState(game:Phaser.Game):MainState {
@@ -58,14 +60,13 @@ class MainState extends Phaser.State {
 
 		this.game.add.existing(this.p);
 
-		this.camera.follow(this.p);
-
 		this.hud = new HUD(this.game);
-
+		this.currentFocus = this.p;
 	}
 
 	public update():void {
 		this.game.physics.arcade.collide(this.p, this.walls);
+		this.camera.follow(this.currentFocus);
 
 		if (this.groups["Probe"]) {
 			this.game.physics.arcade.collide(this.walls, this.groups["Probe"]);
@@ -80,6 +81,17 @@ class MainState extends Phaser.State {
 
 		this.hud.update();
 
+		this.checkSwitchFocus();
+	}
+
+	checkSwitchFocus() {
+		if (this.game.input.keyboard.isDown(Phaser.Keyboard.A)) {
+			var p:Probe = this.hud.probeList.getProble(0);
+
+			if (p) {
+				this.currentFocus = p;
+			}
+		}
 	}
 }
 
@@ -227,6 +239,16 @@ class Probe extends Entity {
 				this.body.velocity.x = 0;
 			}
 		}
+
+		if (MainState.getMainState(this.game).currentFocus != this) return;
+
+		if (keyboard.isDown(Phaser.Keyboard.LEFT)) {
+			this.body.velocity.x = -300;
+		} else if (keyboard.isDown(Phaser.Keyboard.RIGHT)) {
+			this.body.velocity.x = 300;
+		} else {
+			this.body.velocity.x = 0;
+		}
 	}
 }
 
@@ -287,6 +309,10 @@ class ProbeList {
 		this.orderedProbeList[this.probesActive].probe = newProbe;
 	}
 
+	getProble(idx:number) {
+		return this.orderedProbeList[idx].probe;
+	}
+
 	update() {
 		for (var i = 0; i < this.orderedProbeList.length; i++) {
 			this.orderedProbeList[i].update();
@@ -338,6 +364,8 @@ class Player extends Entity {
 	}
 
 	update():void {
+		if (MainState.getMainState(this.game).currentFocus != this) return;
+
 		if (keyboard.isDown(Phaser.Keyboard.LEFT)) {
 			this.body.velocity.x = -300;
 		} else if (keyboard.isDown(Phaser.Keyboard.RIGHT)) {

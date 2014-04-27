@@ -20,13 +20,20 @@ LD29
    ✔ Do a whole array. @done (14-04-26 17:11)
    ✔ Typewritur. @done (14-04-26 17:21)
    ☐ Needs better font...
+ ☐ Probes should have followtext when you send them out.
+ ☐ some sort of indicator as to who you're folllowing...
+ ☐ Think about having more generalized directional shooting...
  ☐ Switch to a probe's perspective.
+    ☐ Probes have limited energy and motion.
+    ☐ It's annoying code-wise that you can drop and pickup probles.
  ☐ Probles need to collide with each other.
  ☐ Probles randomly don't shoot.
  ☐ Pick up probes on de ground.
  ☐ Darkness and light...
  ☐ Look into shadows for glowing...ness
  ☐ Different colored probles. :D via probeID
+ ☐ Your three different probes could have different styles.
+    ☐ Think of the puzzlez!
  ☐ Imagine probes looking sad the longer it's been since they've seen you. OH MY GOD.
  ☐ Dialog boxen.
 

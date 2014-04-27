@@ -23,6 +23,8 @@ class MainState extends Phaser.State {
 	currentFocus:Entity;
 	d:Darkness;
 
+	probePickups:Phaser.Group;
+
 	mapX:number = -1;
 	mapY:number = -1;
 
@@ -68,8 +70,11 @@ class MainState extends Phaser.State {
 		this.f = tileset.createLayer("filler");
 		this.walls = tileset.createLayer("collision");
 		this.trees = tileset.createLayer("tree");
+		this.probePickups = this.game.make.group(this.game.world);
 
 		tileset.createFromObjects("light", 5, "light", 0, true, true, this.game.world, Light);
+
+		tileset.createFromObjects("probe", 6, "probe", 0, true, true, this.probePickups, ProbePickup);
 
 		var start = (tileset.objects["start"][0]);
 
@@ -78,6 +83,7 @@ class MainState extends Phaser.State {
 		this.p.y = start.y;
 
 		this.game.add.existing(this.p);
+		this.game.add.existing(this.probePickups);
 
 
 		this.currentFocus = this.p;
@@ -92,6 +98,8 @@ class MainState extends Phaser.State {
 	}
 
 	public update():void {
+		var that = this;
+
 		this.game.physics.arcade.collide(this.p, this.walls);
 		this.game.physics.arcade.collide(this.p, Darkness.collideGroup);
 		this.camera.follow(this.currentFocus, Phaser.Camera.FOLLOW_PLATFORMER);
@@ -102,6 +110,18 @@ class MainState extends Phaser.State {
 			this.game.physics.arcade.collide(this.walls, probes);
 			this.game.physics.arcade.collide(probes, probes);
 			this.game.physics.arcade.collide(this.p, probes);
+		}
+
+
+		if (this.probePickups) {
+			var pickups:Phaser.Group = this.probePickups;
+
+			this.game.physics.arcade.collide(this.p, pickups, function(o1, o2) {
+				console.log("!!!");
+				Probe.addProbeToInventory(that.game, 0, 0, 0, 0);
+
+				o2.destroy();
+			});
 		}
 
 		// set bounds to the proper screen
@@ -384,8 +404,8 @@ class FollowText extends Phaser.Text {
 class Entity extends Phaser.Sprite {
 	body:Phaser.Physics.Arcade.Body;
 
-	constructor(game:Phaser.Game, spritesheet:string) {
-		super(game, 0, 0, spritesheet, 0);
+	constructor(game:Phaser.Game, x:number, y:number, spritesheet:string, frame:number) {
+		super(game, x, y, spritesheet, frame);
 
 		game.physics.enable(this, Phaser.Physics.ARCADE);
 
@@ -400,6 +420,8 @@ class Entity extends Phaser.Sprite {
 		currentState.groups[superclassName].add(this);
 	}
 }
+
+class ProbePickup extends Entity {}
 
 class DialogBox extends Phaser.Sprite {
 	static DIALOG_WIDTH:number = 400;
@@ -562,7 +584,7 @@ class Probe extends Entity {
 	}
 
 	constructor(game:Phaser.Game, x:number, y:number, dx:number, dy:number, probeId:number) {
-		super(game, "probe");
+		super(game, x, y, "probe", 0);
 
 		this.body.allowGravity = true;
 
@@ -815,7 +837,7 @@ class Player extends Entity {
 	numStartingProbles:number = DEBUG ? 0 : 0;
 
 	constructor(game:Phaser.Game) {
-		super(game, "player");
+		super(game, 0, 0, "player", 0);
 
 		this.body.gravity = new Phaser.Point(0, 1600);
 
@@ -876,14 +898,6 @@ class Player extends Entity {
 		} else if (this.body.facing == Phaser.RIGHT) {
 			this.facing = 1;
 		}
-	}
-}
-
-class Block extends Entity {
-	constructor(game:Phaser.Game) {
-		super(game, "block");
-
-		this.body.immovable = true;
 	}
 }
 

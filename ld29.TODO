@@ -10,7 +10,8 @@ LD29
 
  ☐ Get controls working solidly.
  ☐ Find probes! Story!
- ☐ Carrying a probe gives you a light source.
+ ☐ Add explanitory dialog to explain this mess.
+ ✔ Carrying a probe gives you a light source. @done (14-04-27 14:00)
  ☐ 3 different probes
    ☐ Normal derpy one
    ☐ 4-arrow flying one

@@ -8,6 +8,8 @@ var MAP_HEIGHT:number = 40; // in tiles
 var SCREEN_WIDTH:number = MAP_WIDTH * 25; // in px
 var SCREEN_HEIGHT:number = MAP_HEIGHT * 25; // in px
 
+var DEBUG = true;
+
 class MainState extends Phaser.State {
 	p:Player;
 	walls:Phaser.TilemapLayer;
@@ -69,9 +71,11 @@ class MainState extends Phaser.State {
 
 		tileset.createFromObjects("light", 5, "light", 0, true, true, this.game.world, Light);
 
+		var start = (tileset.objects["start"][0]);
+
 		this.p = new Player(this.game);
-		this.p.x = 50;
-		this.p.y = 250;
+		this.p.x = start.x;
+		this.p.y = start.y;
 
 		this.game.add.existing(this.p);
 
@@ -458,6 +462,7 @@ class DialogObserver {
 	static mapdialogs(): {[key: string]: string[]; } {
 		return { "0,0" : ["I'm the best robot ever!"]
 			   , "1,0": ["The right is too dark. I guess the only way to go is down!"]
+			   , "0,1": ["Whoa!", "This is a little scary."]
 		};
 	}
 
@@ -465,13 +470,15 @@ class DialogObserver {
 		var dialogDict: {[key:number]: string[]; } = {};
 
 		dialogDict[1] = ["Dialog maybe works."];
-		dialogDict[DialogObserver.NO_PROBES] = ["No probles left.", ":("];
+		dialogDict[DialogObserver.NO_PROBES] = ["No probes left."];
 
 		return dialogDict;
 	}
 
 	static newMap(game:Phaser.Game, id:string) {
 		console.log(id);
+
+		if (DEBUG) return;
 
 		if (id in DialogObserver.mapd) {
 			var d:DialogBox = new DialogBox(game, DialogObserver.mapd[id].slice(0));
@@ -531,6 +538,10 @@ class Probe extends Entity {
 	}
 
 	static findProbeToShoot(game:Phaser.Game) {
+		if (Probe.existingProbes.length == 0) {
+			return null;
+		}
+
 		for (var i = 0; i < Probe.existingProbes.length; i++) {
 			if (Probe.existingProbes[i].inInventory) {
 				var result:Probe = Probe.existingProbes[i];
@@ -772,7 +783,7 @@ class HUD {
 		this.probeList = new ProbeList(game);
 		this.youIndicator = new YouIndicator(game);
 
-		this.zHint = new Phaser.Text(game, 25, 60, "Z: Die.", {fill: "#ffffff", font: "15px Arial"});
+		this.zHint = new Phaser.Text(game, 25, 60, "", {fill: "#ffffff", font: "15px Arial"});
 		this.zHint.fixedToCamera = true;
 		this.game.add.existing(this.zHint);
 	}
@@ -786,10 +797,12 @@ class HUD {
 	update() {
 		this.probeList.update();
 
-		if (Probe.nearbyProbesTo(MainState.getMainState(this.game).p).length > 0) {
-			this.zHint.text = "Z: Pick up probe.";
-		} else {
-			this.zHint.text = "Z: Shoot probe.";
+		if (Probe.existingProbes.length > 0) {
+			if (Probe.nearbyProbesTo(MainState.getMainState(this.game).p).length > 0) {
+				this.zHint.text = "Z: Pick up probe.";
+			} else {
+				this.zHint.text = "Z: Shoot probe.";
+			}
 		}
 	}
 
@@ -799,7 +812,7 @@ class HUD {
 
 class Player extends Entity {
 	facing:number;
-	numStartingProbles:number = 2;
+	numStartingProbles:number = DEBUG ? 0 : 0;
 
 	constructor(game:Phaser.Game) {
 		super(game, "player");
@@ -811,6 +824,8 @@ class Player extends Entity {
 	}
 
 	fireProbe():void {
+		if (Probe.existingProbes.length == 0) return;
+
 		var dx = this.facing;
 		var nearProbes:Probe[] = Probe.nearbyProbesTo(this);
 

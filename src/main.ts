@@ -30,11 +30,12 @@ class MainState extends Phaser.State {
 		this.load.spritesheet("player","assets/player.png",25,25,1,0,0);
 		this.load.spritesheet("block","assets/block.png",25,25,1,0,0);
 		this.load.spritesheet("probe","assets/probe.png",25,25,1,0,0);
-		this.load.spritesheet("hud-probe","assets/hud-probe-indicator.png",25,25,4,0,0);
+		this.load.spritesheet("hud-probe","assets/hud-probe-indicator.png",25,25,5,0,0);
 		this.load.image("energybar", "assets/energybar.png");
 		this.load.image("hud-msg-a","assets/msgA.png");
 		this.load.image("hud-msg-s","assets/msgS.png");
 		this.load.image("hud-msg-d","assets/msgD.png");
+		this.load.image("hud-msg-c","assets/msgc.png");
 		this.load.image("hud-msg-zzz","assets/msgZZZ.png");
 		this.load.tilemap("map", "assets/map.json", null, Phaser.Tilemap.TILED_JSON);
 	}
@@ -87,12 +88,22 @@ class MainState extends Phaser.State {
 	}
 
 	checkSwitchFocus() {
-		if (this.game.input.keyboard.isDown(Phaser.Keyboard.A)) {
-			var p:Probe = this.hud.probeList.getProble(0);
+		var keyToProbleIdx:number[] = [Phaser.Keyboard.A, Phaser.Keyboard.S, Phaser.Keyboard.D];
 
-			if (p) {
-				this.currentFocus = p;
+		for (var i = 0; i < keyToProbleIdx.length; i++) {
+			if (this.game.input.keyboard.isDown(keyToProbleIdx[i])) {
+				var probe:Probe = this.hud.probeList.getProble(i);
+
+				if (probe) {
+					this.currentFocus = probe;
+
+					return;
+				}
 			}
+		}
+
+		if (this.game.input.keyboard.isDown(Phaser.Keyboard.C)) {
+			this.currentFocus = this.p;
 		}
 	}
 }
@@ -305,6 +316,20 @@ class Bar extends Phaser.Sprite {
 	}
 }
 
+class YouIndicator extends Phaser.Sprite {
+	msg:Phaser.Sprite;
+
+	constructor(game:Phaser.Game) {
+		super(game, 25, 25, "hud-probe", 4);
+
+		this.msg = new Phaser.Sprite(game, 25, -25, "hud-msg-c");
+		this.addChild(this.msg);
+		game.add.existing(this);
+
+		this.fixedToCamera = true;
+	}
+}
+
 class ProbeIndicator extends Phaser.Sprite {
 	static HAPPY:number = 0;
 	static OK:number = 1;
@@ -320,7 +345,7 @@ class ProbeIndicator extends Phaser.Sprite {
 	which:number;
 
 	constructor(game:Phaser.Game, which:number, probe:Probe) {
-		super(game, 25 + which * ProbeIndicator.WIDTH, 25, "hud-probe", 3);
+		super(game, 125 + which * ProbeIndicator.WIDTH, 25, "hud-probe", 3);
 
 		this.probe = probe;
 		this.which = which;
@@ -390,12 +415,14 @@ class ProbeList {
 class HUD {
 	game:Phaser.Game;
 	probeList:ProbeList;
+	youIndicator:YouIndicator;
 
 	static NEW_PROBLE:number = 0;
 
 	constructor(game:Phaser.Game) {
 		this.game = game;
 		this.probeList = new ProbeList(game);
+		this.youIndicator = new YouIndicator(game);
 	}
 
 	signal(val:number, extra:any) {

@@ -21,6 +21,9 @@ class MainState extends Phaser.State {
 	currentFocus:Entity;
 	d:Darkness;
 
+	mapX:number = -1;
+	mapY:number = -1;
+
 	groups: {[key: string]: Phaser.Group} = {};
 
 	static getMainState(game:Phaser.Game):MainState {
@@ -97,10 +100,16 @@ class MainState extends Phaser.State {
 
 		// set bounds to the proper screen
 
-		var mapX:number = Math.floor(this.p.x / SCREEN_WIDTH)  * SCREEN_WIDTH;
-		var mapY:number = Math.floor(this.p.y / SCREEN_HEIGHT) * SCREEN_HEIGHT;
+		var newMapX:number = Math.floor(this.p.x / SCREEN_WIDTH)  * SCREEN_WIDTH;
+		var newMapY:number = Math.floor(this.p.y / SCREEN_HEIGHT) * SCREEN_HEIGHT;
 
-		this.game.world.setBounds(mapX, mapY, SCREEN_WIDTH, SCREEN_HEIGHT);
+		if (newMapX != this.mapX || newMapY != this.mapY) {
+			this.mapX = newMapX;
+			this.mapY = newMapY;
+
+			this.game.world.setBounds(newMapX, newMapY, SCREEN_WIDTH, SCREEN_HEIGHT);
+			Darkness.adjustCamera(newMapX, newMapY);
+		}
 		this.d.update();
 
 		this.hud.update();
@@ -172,8 +181,10 @@ class Cell extends Phaser.Sprite {
 
 class Darkness {
 	game:Phaser.Game;
-	cells:Cell[][];
-	static staticLighbearer:Phaser.Sprite[] = [];
+	static cells:Cell[][];
+	static mapX:number = 0;
+	static mapY:number = 0;
+	static staticLightbearer:Phaser.Sprite[] = [];
 	static lightbearers:Probe[] = [];
 	static player:Player;
 	static walls:Phaser.TilemapLayer;
@@ -185,14 +196,14 @@ class Darkness {
 
 		Darkness.collideGroup = new Phaser.Group(this.game);
 
-		this.cells = [];
+		Darkness.cells = [];
 		for (var i = 0; i < MAP_WIDTH; i++) {
-			this.cells[i] = [];
+			Darkness.cells[i] = [];
 			for (var j = 0; j < MAP_HEIGHT; j++) {
 				var cell:Cell = new Cell(game, Darkness.collideGroup);
-				this.cells[i][j] = cell;
-				this.cells[i][j].x = i * 25;
-				this.cells[i][j].y = j * 25;
+				Darkness.cells[i][j] = cell;
+				Darkness.cells[i][j].x = i * 25;
+				Darkness.cells[i][j].y = j * 25;
 			}
 		}
 
@@ -204,18 +215,44 @@ class Darkness {
 	}
 
 	static addLight(light:Phaser.Sprite) {
-		Darkness.staticLighbearer.push(light);
+		Darkness.staticLightbearer.push(light);
 	}
 
 	static addPlayer(player:Player) {
 		Darkness.player = player;
 	}
 
+	static adjustCamera(mapX:number, mapY:number) {
+		if (mapX != Darkness.mapX || mapY != Darkness.mapY) {
+
+			for (var i = 0; i < MAP_WIDTH; i++) {
+				for (var j = 0; j < MAP_HEIGHT; j++) {
+					var c:Cell = Darkness.cells[i][j];
+
+					//to relative position
+					c.x -= Darkness.mapX;
+					c.y -= Darkness.mapY;
+
+					//to new position
+					c.x += mapX;
+					c.y += mapY;
+				}
+			}
+
+			Darkness.mapX = mapX;
+			Darkness.mapY = mapY;
+		}
+	}
+
 	xyToCell(x:number, y:number) {
+		x -= Darkness.mapX;
+		y -= Darkness.mapY;
+
 		var i = Math.floor(x / 25);
 		var j = Math.floor(y / 25);
 
-		if (i >= 0 && j >= 0 && i < this.cells.length && j < this.cells[i].length) return this.cells[i][j];
+		if (i >= 0 && j >= 0 && i < Darkness.cells.length && j < Darkness.cells[i].length) 
+			return Darkness.cells[i][j];
 		return null;
 	}
 
@@ -233,9 +270,9 @@ class Darkness {
 	update() {
 		var player:Player = Darkness.player;
 
-		for (var i = 0; i < this.cells.length; i++) {
-			for (var j = 0; j < this.cells[i].length; j++) {
-				this.cells[i][j].on();
+		for (var i = 0; i < Darkness.cells.length; i++) {
+			for (var j = 0; j < Darkness.cells[i].length; j++) {
+				Darkness.cells[i][j].on();
 			}
 		}
 
@@ -244,14 +281,18 @@ class Darkness {
 		for (var i = 0; i < Darkness.lightbearers.length; i++) {
 			var p:Probe = Darkness.lightbearers[i];
 			if (!p.inInventory) {
-				this.raycastAround(Darkness.lightbearers[i]);
+				if (this.game.world.bounds.contains(p.x, p.y)) {
+					this.raycastAround(Darkness.lightbearers[i]);
+				}
 			}
 		}
 
-		for (var i = 0; i < Darkness.staticLighbearer.length; i++) {
-			var l:Phaser.Sprite = Darkness.staticLighbearer[i];
+		for (var i = 0; i < Darkness.staticLightbearer.length; i++) {
+			var l:Phaser.Sprite = Darkness.staticLightbearer[i];
 
-			this.raycastAround(l, 150);
+			if (this.game.world.bounds.contains(l.x, l.y)) {
+				this.raycastAround(l, 150);
+			}
 		}
 	}
 }

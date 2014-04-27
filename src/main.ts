@@ -29,6 +29,9 @@ class MainState extends Phaser.State {
 		this.load.spritesheet("block","assets/block.png",25,25,1,0,0);
 		this.load.spritesheet("probe","assets/probe.png",25,25,1,0,0);
 		this.load.spritesheet("hud-probe","assets/hud-probe-indicator.png",25,25,4,0,0);
+		this.load.image("hud-msg-a","assets/msgA.png");
+		this.load.image("hud-msg-s","assets/msgS.png");
+		this.load.image("hud-msg-d","assets/msgD.png");
 		this.load.tilemap("map", "assets/map.json", null, Phaser.Tilemap.TILED_JSON);
 	}
 
@@ -235,11 +238,19 @@ class ProbeIndicator extends Phaser.Sprite {
 
 	happinessLevel:number = 0;
 	probe:Probe = null;
+	msg:Phaser.Sprite;
 
 	constructor(game:Phaser.Game, which:number, happiness:number = 0) {
 		super(game, 25 + which * 30, 25, "hud-probe", happiness);
 
 		this.happinessLevel = happiness;
+
+		this.msg = game.add.sprite(25, -25, "hud-msg-a");
+		this.addChild(this.msg);
+	}
+
+	update() {
+		this.msg.visible = this.happinessLevel != ProbeIndicator.HIDDEN;
 	}
 }
 
@@ -271,13 +282,14 @@ class ProbeList {
 	}
 
 	addAliveProble(newProbe:Probe) {
+		this.orderedProbeList[this.probesActive].happinessLevel = ProbeIndicator.HAPPY;
 		this.orderedProbeList[this.probesActive].frame = ProbeIndicator.HAPPY;
 		this.orderedProbeList[this.probesActive].probe = newProbe;
 	}
 
 	update() {
 		for (var i = 0; i < this.orderedProbeList.length; i++) {
-			// TODO figure out happiness...
+			this.orderedProbeList[i].update();
 		}
 	}
 }

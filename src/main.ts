@@ -136,30 +136,63 @@ class Light extends Phaser.Sprite {
 	}
 }
 
-class Darkness extends Phaser.Group {
+class Cell extends Phaser.Sprite {
+	container:Phaser.Group;
+	isOn:boolean = true;
+
+	constructor(game:Phaser.Game, container:Phaser.Group) {
+		super(game, 0, 0, "bw", 0);
+
+		this.container = container;
+		this.container.add(this);
+	}
+
+	// collision off, light on. 
+	off() {
+		if (this.isOn) {
+			this.container.remove(this);
+			this.frame = 1;
+			this.isOn = false;
+		}
+	}
+
+	// collision on, light off. (ARGH!)
+	on() {
+		if (!this.isOn) {
+			this.container.add(this);
+			this.frame = 0;
+			this.isOn = true;
+		}
+	}
+}
+
+class Darkness {
 	game:Phaser.Game;
-	cells:Phaser.Sprite[][];
+	cells:Cell[][];
 	static staticLighbearer:Phaser.Sprite[] = [];
 	static lightbearers:Probe[] = [];
 	static player:Player;
 	static walls:Phaser.TilemapLayer;
 
-	constructor(game:Phaser.Game) {
-		super(game, game.world);
+	static collideGroup:Phaser.Group;
 
+	constructor(game:Phaser.Game) {
 		this.game = game;
+
+		Darkness.collideGroup = new Phaser.Group(this.game);
 
 		this.cells = [];
 		for (var i = 0; i < 50; i++) {
 			this.cells[i] = [];
 			for (var j = 0; j < 50; j++) {
-				var sprite:Phaser.Sprite = (new Phaser.Sprite(game, i * 25, j * 25, "bw", 0))
-				this.addChild(sprite);
-				this.cells[i][j] = sprite;
+				var cell:Cell = new Cell(game, Darkness.collideGroup);
+				this.cells[i][j] = cell;
+				this.cells[i][j].x = i * 25;
+				this.cells[i][j].y = j * 25;
 			}
 		}
 
-		this.game.add.existing(this);
+		this.game.add.existing(Darkness.collideGroup);
 	}
 
 	static addProbe(bearer:Probe) {
@@ -187,7 +220,7 @@ class Darkness extends Phaser.Group {
 			for (var j = target.y - radius; j < target.y + radius; j += 25) {
 				var cell = this.xyToCell(i, j);
 				if (cell) {
-					cell.frame = 1;
+					cell.off();
 				}
 			}
 		}
@@ -197,8 +230,8 @@ class Darkness extends Phaser.Group {
 		var player:Player = Darkness.player;
 
 		for (var i = 0; i < this.cells.length; i++) {
-			for (var j = 0; j < this.cells.length; j++) {
-				this.cells[i][j].frame = 0;
+			for (var j = 0; j < this.cells[i].length; j++) {
+				this.cells[i][j].on();
 			}
 		}
 

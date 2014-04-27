@@ -28,6 +28,9 @@ class MainState extends Phaser.State {
 	mapX:number = -1;
 	mapY:number = -1;
 
+	hasSwitchedFocus:boolean = false;
+	hasSwitchedback:boolean = false;
+
 	mapsIveSeen: {[key: string]: boolean} = {};
 
 	groups: {[key: string]: Phaser.Group} = {};
@@ -117,7 +120,6 @@ class MainState extends Phaser.State {
 			var pickups:Phaser.Group = this.probePickups;
 
 			this.game.physics.arcade.collide(this.p, pickups, function(o1, o2) {
-				console.log("!!!");
 				Probe.addProbeToInventory(that.game, 0, 0, 0, 0);
 
 				o2.destroy();
@@ -164,12 +166,20 @@ class MainState extends Phaser.State {
 				if (probe && !probe.inInventory) {
 					this.currentFocus = probe;
 
+			 		if (!this.hasSwitchedFocus && !DEBUG) {
+						DialogObserver.signal(this.game, DialogObserver.FIRST_CONTROL);
+						this.hasSwitchedFocus = true;
+			 		}
 					return;
 				}
 			}
 		}
 
 		if (this.game.input.keyboard.isDown(Phaser.Keyboard.C)) {
+			if (this.currentFocus != this.p && !this.hasSwitchedback && !DEBUG) {
+				DialogObserver.signal(this.game, DialogObserver.FIRST_SWITCHBACK);
+				this.hasSwitchedback = true;
+			}
 			this.currentFocus = this.p;
 		}
 	}
@@ -477,6 +487,10 @@ class DialogBox extends Phaser.Sprite {
 
 class DialogObserver {
 	static NO_PROBES:number = 2;
+	static FOUND_PROBE:number = 3;
+	static FIRST_TOSS:number = 4;
+	static FIRST_CONTROL:number = 5;
+	static FIRST_SWITCHBACK:number = 6; // enums suck, real men ensure constants are unique by hand
 
 	static dialogs: {[key: number]: string[]; } = DialogObserver.dialog();
 	static mapd: {[key: string]: string[]; } = DialogObserver.mapdialogs();
@@ -493,7 +507,20 @@ class DialogObserver {
 
 		dialogDict[1] = ["Dialog maybe works."];
 		dialogDict[DialogObserver.NO_PROBES] = ["No probes left."];
-
+		dialogDict[DialogObserver.FOUND_PROBE] = ["You found a probe!", 
+													"Alright, so Probes give you a light source of your own, so now you can venture into the darkness!",
+													"You can also TOSS a probe with Z. (If you toss all your probes, you'll no longer have a light source.)",
+													"Once you've tossed a probe, you can remotely control it. The button to control it will be shown on the display.",
+													"Go ahead and toss this probe now."];
+		dialogDict[DialogObserver.FIRST_TOSS] = ["Great! Now, press A (see the indicator?) to control the probe."];
+		dialogDict[DialogObserver.FIRST_CONTROL] = ["You're now controlling the probe!",
+		                                            "You can use arrow keys to move left and right. Probes are however too dumb to jump.",
+		                                            "Probes also have limited energy as shown by the bar.",
+		                                            "Once it runs out, you'll have to switch back to yourself with C.",
+		                                            "And I hope you remember all this crap because I'm not telling you it again.",
+		                                            "(You can always check the heads up display for a helpful hint!)"];
+		dialogDict[DialogObserver.FIRST_SWITCHBACK] = ["Last thing: you can pick up probes you've tossed by standing near them and pressing Z.",
+													 "This will recharge their energy, but unfortunately it won't make them any less dumb."];
 		return dialogDict;
 	}
 
@@ -552,6 +579,10 @@ class Probe extends Entity {
 
 	static addProbeToInventory(game:Phaser.Game, x:number, y:number, dx:number, dy:number=0):Probe {
 		var p:Probe = new Probe(game, x, y, dx, dy, Probe.probesActive++);
+
+		if (Probe.existingProbes.length == 0 && !DEBUG) {
+			DialogObserver.signal(game, DialogObserver.FOUND_PROBE);
+		}
 
 		p.exists = false;
 		Probe.existingProbes.push(p);
@@ -725,9 +756,9 @@ class ProbeIndicator extends Phaser.Sprite {
 		this.addChild(this.msg);
 
 		this.energybar = new Bar(this.game, 100, 100);
-		this.addChild(this.energybar);
+		this.probe.addChild(this.energybar);
 		this.energybar.x = 0;
-		this.energybar.y = 30;
+		this.energybar.y = -10;
 	}
 
 	swapMsg(newTexture:string) {
@@ -835,6 +866,7 @@ class HUD {
 class Player extends Entity {
 	facing:number;
 	numStartingProbles:number = DEBUG ? 0 : 0;
+	hasShotProbe:boolean = false;
 
 	constructor(game:Phaser.Game) {
 		super(game, 0, 0, "player", 0);
@@ -868,6 +900,11 @@ class Player extends Entity {
 
 		var cuteSayings:string[] = ["wheeee!", "into the darkness!", "it's nice to find friends down here!", "this is fun!", ":3     ", ":D     ", "yay!", "thanks for finding me!", "together, we can do it!"];
  		new FollowText(this.game, p, cuteSayings[Math.floor(Math.random() * cuteSayings.length)]);
+
+ 		if (!this.hasShotProbe && !DEBUG) {
+			DialogObserver.signal(this.game, DialogObserver.FIRST_TOSS);
+			this.hasShotProbe = true;
+ 		}
 	}
 
 	update():void {

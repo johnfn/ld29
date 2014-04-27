@@ -311,17 +311,24 @@ class ProbeIndicator extends Phaser.Sprite {
 	static SAD:number = 2;
 	static HIDDEN:number = 3;
 
+	static WIDTH = 110;
+
 	happinessLevel:number = 0;
 	probe:Probe = null;
 	msg:Phaser.Sprite;
 	energybar: Bar;
+	which:number;
 
-	constructor(game:Phaser.Game, which:number, happiness:number = 0) {
-		super(game, 25 + which * 30, 25, "hud-probe", happiness);
+	constructor(game:Phaser.Game, which:number, probe:Probe) {
+		super(game, 25 + which * ProbeIndicator.WIDTH, 25, "hud-probe", 3);
 
-		this.happinessLevel = happiness;
+		this.probe = probe;
+		this.which = which;
+		this.happinessLevel = ProbeIndicator.HIDDEN;
 
-		this.msg = game.add.sprite(25, -25, "hud-msg-a");
+		var whichMsg:string = ["a", "s", "d"][this.which];
+
+		this.msg = game.add.sprite(25, -25, "hud-msg-" + whichMsg);
 		this.addChild(this.msg);
 
 		this.energybar = new Bar(this.game, 100, 100);
@@ -351,7 +358,6 @@ class ProbeList {
 	contents:Phaser.Group;
 	game:Phaser.Game;
 	probesOwned:number = 1;
-	probesActive:number = 0;
 	orderedProbeList:ProbeIndicator[] = [];
 
 	constructor(game:Phaser.Game) {
@@ -363,13 +369,11 @@ class ProbeList {
 	}
 
 	addAliveProble(newProbe:Probe) {
-		var newIndicator = new ProbeIndicator(this.game, this.probesActive, ProbeIndicator.HIDDEN);
+		var newIndicator = new ProbeIndicator(this.game, this.orderedProbeList.length, newProbe);
 
 		this.contents.add(newIndicator);
 		this.orderedProbeList.push(newIndicator);
 		newIndicator.visible = true;
-
-		this.orderedProbeList[this.probesActive].probe = newProbe;
 	}
 
 	getProble(idx:number) {
@@ -378,7 +382,7 @@ class ProbeList {
 
 	update() {
 		for (var i = 0; i < this.orderedProbeList.length; i++) {
-			this.orderedProbeList[i].update();
+			this.orderedProbeList[i].update()	;
 		}
 	}
 }
@@ -410,7 +414,7 @@ class HUD {
 
 class Player extends Entity {
 	facing:number;
-	numStartingProbles:number = 1;
+	numStartingProbles:number = 2;
 
 	constructor(game:Phaser.Game) {
 		super(game, "player");
@@ -419,7 +423,6 @@ class Player extends Entity {
 
 		var fireButton = game.input.keyboard.addKey(Phaser.Keyboard.Z);
 		fireButton.onDown.add(this.fireProbe, this);
-
 	}
 
 	fireProbe():void {
@@ -440,6 +443,7 @@ class Player extends Entity {
 		for (var i = 0 ; i < this.numStartingProbles; i++) {
 			Probe.addProbeToInventory(this.game, this.x, this.y, 0, 0);
 		}
+
 		this.numStartingProbles = 0;
 
 		if (MainState.getMainState(this.game).currentFocus != this) return;

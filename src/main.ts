@@ -338,9 +338,11 @@ class Darkness {
 			}
 		}
 
+		/*
 		if (playerHasAtLeastOneProbe) {
 			this.raycastAround(Darkness.player);
 		}
+		*/
 
 		for (var i = 0; i < Darkness.staticLightbearer.length; i++) {
 			var l:Phaser.Sprite = Darkness.staticLightbearer[i];
@@ -508,8 +510,8 @@ class DialogObserver {
 		dialogDict[1] = ["Dialog maybe works."];
 		dialogDict[DialogObserver.NO_PROBES] = ["No probes left."];
 		dialogDict[DialogObserver.FOUND_PROBE] = ["You found a probe!", 
-													"Alright, so Probes give you a light source of your own, so now you can venture into the darkness!",
-													"You can also TOSS a probe with Z. (If you toss all your probes, you'll no longer have a light source.)",
+													"Probes are little robots that shine light.",
+													"You can TOSS a probe with Z.",
 													"Once you've tossed a probe, you can remotely control it. The button to control it will be shown on the display.",
 													"Go ahead and toss this probe now."];
 		dialogDict[DialogObserver.FIRST_TOSS] = ["Great! Now, press A (see the indicator?) to control the probe."];
@@ -875,6 +877,21 @@ class Player extends Entity {
 
 		var fireButton = game.input.keyboard.addKey(Phaser.Keyboard.Z);
 		fireButton.onDown.add(this.fireProbe, this);
+
+		var summonButton = game.input.keyboard.addKey(Phaser.Keyboard.Q);
+		summonButton.onDown.add(this.summonProbes, this);
+	}
+
+	summonProbes():void {
+		for (var i = 0; i < Probe.existingProbes.length; i++) {
+			var p:Probe = Probe.existingProbes[i];
+
+			if (!p.inInventory) {
+				this.game.add.tween(p).to({x: this.x, y:this.y}, 600, Phaser.Easing.Quadratic.In, true).onComplete.add(function() {
+					p.pickup();
+				});
+			}
+		}
 	}
 
 	fireProbe():void {

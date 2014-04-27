@@ -59,9 +59,6 @@ class MainState extends Phaser.State {
 
 		this.hud = new HUD(this.game);
 
-		var d:DialogBox = new DialogBox(this.game, ["test lal aladsldlasldalsdlasdll", "test2"]);
-		this.game.add.existing(d);
-
 	}
 
 	public update():void {
@@ -164,17 +161,21 @@ class DialogObserver {
 		var dialogDict: {[key:number]: string[]; } = {};
 
 		dialogDict[1] = ["Dialog maybe works."];
-		dialogDict[DialogObserver.NO_PROBES] = ["No probles left."];
+		dialogDict[DialogObserver.NO_PROBES] = ["No probles left.", ":("];
 
 		return dialogDict;
 	}
 
-	static signal(dialogID:number) {
-		if (!DialogObserver.dialogs[dialogID]) {
+	static signal(game:Phaser.Game, dialogID:number) {
+		var dialogs:string[] = DialogObserver.dialogs[dialogID];
+
+		if (!dialogs) {
 			console.error("no dialog with " + dialogID + " found.");
+			return;
 		}
 
-		console.log(DialogObserver.dialogs[dialogID]);
+		var d:DialogBox = new DialogBox(game, dialogs.slice(0));
+		game.add.existing(d);
 	}
 }
 
@@ -187,7 +188,7 @@ class Probe extends Entity {
 
 	static makeNewProbe(game:Phaser.Game, x:number, y:number, dx:number, dy:number=0):Probe {
 		if (Probe.probesActive >= Probe.MAX_PROBES) {
-			DialogObserver.signal(DialogObserver.NO_PROBES);
+			DialogObserver.signal(game, DialogObserver.NO_PROBES);
 
 			return null;
 		}

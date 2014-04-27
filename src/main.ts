@@ -2,8 +2,8 @@
 
 var keyboard:Phaser.Keyboard;
 
-var MAP_WIDTH:number = 50; // in tiles
-var MAP_HEIGHT:number = 50; // in tiles
+var MAP_WIDTH:number = 40; // in tiles
+var MAP_HEIGHT:number = 40; // in tiles
 
 var SCREEN_WIDTH:number = MAP_WIDTH * 25; // in px
 var SCREEN_HEIGHT:number = MAP_HEIGHT * 25; // in px
@@ -58,8 +58,8 @@ class MainState extends Phaser.State {
 
 		tileset.setCollisionBetween(1,151,true,"collision");
 		this.background = tileset.createLayer("background-1");
-		this.walls = tileset.createLayer("collision");
 		this.f = tileset.createLayer("filler");
+		this.walls = tileset.createLayer("collision");
 		this.trees = tileset.createLayer("tree");
 
 		tileset.createFromObjects("light", 5, "light", 0, true, true, this.game.world, Light);
@@ -186,9 +186,9 @@ class Darkness {
 		Darkness.collideGroup = new Phaser.Group(this.game);
 
 		this.cells = [];
-		for (var i = 0; i < 50; i++) {
+		for (var i = 0; i < MAP_WIDTH; i++) {
 			this.cells[i] = [];
-			for (var j = 0; j < 50; j++) {
+			for (var j = 0; j < MAP_HEIGHT; j++) {
 				var cell:Cell = new Cell(game, Darkness.collideGroup);
 				this.cells[i][j] = cell;
 				this.cells[i][j].x = i * 25;
@@ -215,7 +215,7 @@ class Darkness {
 		var i = Math.floor(x / 25);
 		var j = Math.floor(y / 25);
 
-		if (i >= 0 && j >= 0) return this.cells[i][j];
+		if (i >= 0 && j >= 0 && i < this.cells.length && j < this.cells[i].length) return this.cells[i][j];
 		return null;
 	}
 
@@ -482,6 +482,8 @@ class Probe extends Entity {
 		this.body.bounce.y = .3;
 		this.body.bounce.x = .3;
 
+		this.body.collideWorldBounds = true;
+
 		this.setd(dx, dy);
 
 		this.x = x;
@@ -506,7 +508,7 @@ class Probe extends Entity {
 		}
 
 		if (this.body.blocked.down) {
-			this.body.velocity.x *= .9;
+			this.body.velocity.x *= .8;
 
 			if (Math.abs(this.body.velocity.x) < 5) {
 				this.body.velocity.x = 0;

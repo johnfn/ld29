@@ -465,6 +465,24 @@ class Player extends Entity {
 
 	fireProbe():void {
 		var dx = this.facing;
+		var pickedUp:boolean = false;
+
+		// see if we can find a probe to pick up first.
+
+		for (var i = 0; i < Probe.existingProbes.length; i++) {
+			var p:Probe = Probe.existingProbes[i];
+
+			if (p.inInventory) continue;
+
+			var dist:number = Phaser.Math.distance(this.x, this.y, p.x, p.y);
+
+			if (dist < 50) {
+				p.inInventory = true;
+				pickedUp = true;
+			}
+		}
+
+		if (pickedUp) return; // either pick up or shoot, not both.
 
 		var p:Probe = Probe.findProbeToShoot(this.game);
 		if (!p) return;

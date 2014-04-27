@@ -10,41 +10,21 @@ LD29
 
 
  ☐ Get controls working solidly.
- ✔ Shoot a proble. @done (14-04-26 18:14)
-   ✔ Need to have more refined collision typez. @done (14-04-26 13:30)
-   nope
-   ✔ Need gravity. @done (14-04-26 13:30)
- ✔ HUD for probes left. @done (14-04-26 20:18)
- ✔ Show dialog: "you don't have any more probes!" @done (14-04-26 17:29)
-   ☐ Block all other events.
-   ✔ Do a whole array. @done (14-04-26 17:11)
-   ✔ Typewritur. @done (14-04-26 17:21)
+   ☐ Block all other events for dialog.
    ☐ Needs better font...
- ✔ some sort of indicator as to who you're folllowing... @done (14-04-26 22:24)
- ☐ Probes should have followtext when you send them out. And other times.
        ☐ And make cute noises :3 
        ☐ When you focus on one, gray colors: 
           https://github.com/photonstorm/phaser-examples/blob/master/filters/Gray.js
 
-          ☐ Could even have limited sight!!!
+          ✔ Could even have limited sight!!! @done (14-04-27 09:18)
           ☐ Better than all these, scanlines.
           ☐ And a little static.
  ☐ Probe icon should be sleepy too.
+ ☐ HUD on top of darkness.
  ☐ Camera easing.
  ☐ Need more juice for picking up probles.
  ☐ Think about having more generalized directional shooting...
- ✔ Switch to a probe's perspective. @done (14-04-26 20:18)
-    ✔ Probes have limited energy and motion. @done (14-04-26 20:18)
-    ✔ It's annoying code-wise that you can drop and pickup probles. @done (14-04-26 20:18)
-    ✔ Refactor: Probes need to always exist, they just need to have a 'non-deployed' state. @done (14-04-26 20:18)
- ✔ Pick up probes on de ground. @done (14-04-26 20:56)
- ✔ You can switch to probes that are in your inventory. :X @done (14-04-26 20:47)
- ✔ For some reason zzz turned into C... lol wut. Oh lol i changed the asset. @done (14-04-26 20:36)
- ✔ Switch back to robot. @done (14-04-26 20:32)
- ✔ Probles need to collide with each other. @done (14-04-26 20:47)
- ✔ Probles randomly don't shoot. @done (14-04-26 20:19)
  ☐ HUD needs moar juice.
- ☐ Indicate if you can pick up probles. Logic is currently in fireProbe (of all places)
  ☐ Darkness and light...
  ☐ Look into shadows for glowing...ness
  ☐ Different colored probles. :D via probeID
@@ -61,3 +41,28 @@ LD29
 
  ☐ Must do multiple screens now. EVERY TIME I DO THIS... EVERY TIME.
  ☐ Camera movin
+
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+Archive:
+ ✔ Shoot a proble. @done (14-04-26 18:14)
+ ✔ Need to have more refined collision typez. @done (14-04-26 13:30)
+  nope
+ ✔ Need gravity. @done (14-04-26 13:30)
+ ✔ HUD for probes left. @done (14-04-26 20:18)
+ ✔ Show dialog: "you don't have any more probes!" @done (14-04-26 17:29)
+ ✔ Do a whole array. @done (14-04-26 17:11)
+ ✔ Typewritur. @done (14-04-26 17:21)
+ ✔ some sort of indicator as to who you're folllowing... @done (14-04-26 22:24)
+ ✔ Probes should have followtext when you send them out. And other times. @done (14-04-26 22:41)
+ ✔ Switch to a probe's perspective. @done (14-04-26 20:18)
+ ✔ Probes have limited energy and motion. @done (14-04-26 20:18)
+ ✔ It's annoying code-wise that you can drop and pickup probles. @done (14-04-26 20:18)
+ ✔ Refactor: Probes need to always exist, they just need to have a 'non-deployed' state. @done (14-04-26 20:18)
+ ✔ Pick up probes on de ground. @done (14-04-26 20:56)
+ ✔ You can switch to probes that are in your inventory. :X @done (14-04-26 20:47)
+ ✔ For some reason zzz turned into C... lol wut. Oh lol i changed the asset. @done (14-04-26 20:36)
+ ✔ Switch back to robot. @done (14-04-26 20:32)
+ ✔ Probles need to collide with each other. @done (14-04-26 20:47)
+ ✔ Probles randomly don't shoot. @done (14-04-26 20:19)
+ ✔ Indicate if you can pick up probles. Logic is currently in fireProbe (of all places) @done (14-04-26 22:41)

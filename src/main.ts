@@ -19,6 +19,7 @@ class MainState extends Phaser.State {
 	target:Target;
 
 	currentFocus:Entity;
+	d:Darkness;
 
 	groups: {[key: string]: Phaser.Group} = {};
 
@@ -32,6 +33,7 @@ class MainState extends Phaser.State {
 		this.load.spritesheet("block","assets/block.png",25,25,1,0,0);
 		this.load.spritesheet("probe","assets/probe.png",25,25,1,0,0);
 		this.load.spritesheet("hud-probe","assets/hud-probe-indicator.png",25,25,5,0,0);
+		this.load.spritesheet("bw","assets/bw.png",25,25,2,0,0);
 		this.load.image("energybar", "assets/energybar.png");
 		this.load.image("target", "assets/target.png");
 		this.load.image("hud-msg-a","assets/msgA.png");
@@ -64,12 +66,17 @@ class MainState extends Phaser.State {
 		this.p.y = 50;
 
 		this.game.add.existing(this.p);
-		this.hud = new HUD(this.game);
-		this.target = new Target(this.game);
 
-		this.game.add.existing(this.target);
 
 		this.currentFocus = this.p;
+
+		this.d = new Darkness(this.game);
+		Darkness.addPlayer(this.p);
+		Darkness.walls = this.walls;
+
+		this.hud = new HUD(this.game);
+		this.target = new Target(this.game);
+		this.game.add.existing(this.target);
 	}
 
 	public update():void {
@@ -90,6 +97,7 @@ class MainState extends Phaser.State {
 		var mapY:number = Math.floor(this.p.y / SCREEN_HEIGHT) * SCREEN_HEIGHT;
 
 		this.game.world.setBounds(mapX, mapY, SCREEN_WIDTH, SCREEN_HEIGHT);
+		this.d.update();
 
 		this.hud.update();
 
@@ -113,6 +121,78 @@ class MainState extends Phaser.State {
 
 		if (this.game.input.keyboard.isDown(Phaser.Keyboard.C)) {
 			this.currentFocus = this.p;
+		}
+	}
+}
+
+class Darkness extends Phaser.Group {
+	game:Phaser.Game;
+	cells:Phaser.Sprite[][];
+	static lightbearers:Probe[] = [];
+	static player:Player;
+	static walls:Phaser.TilemapLayer;
+
+	constructor(game:Phaser.Game) {
+		super(game, game.world);
+
+		this.game = game;
+
+		this.cells = [];
+		for (var i = 0; i < 50; i++) {
+			this.cells[i] = [];
+			for (var j = 0; j < 50; j++) {
+				var sprite:Phaser.Sprite = (new Phaser.Sprite(game, i * 25, j * 25, "bw", 0))
+				this.addChild(sprite);
+				this.cells[i][j] = sprite;
+			}
+		}
+
+		this.game.add.existing(this);
+	}
+
+	static addProbe(bearer:Probe) {
+		Darkness.lightbearers.push(bearer);
+	}
+
+	static addPlayer(player:Player) {
+		Darkness.player = player;
+	}
+
+	xyToCell(x:number, y:number) {
+		var i = Math.floor(x / 25);
+		var j = Math.floor(y / 25);
+
+		if (i > 0 && j > 0) return this.cells[i][j];
+		return null;
+	}
+
+	raycastAround(target:Phaser.Sprite, radius:number = 100) {
+		for (var i = target.x - radius; i < target.x + radius; i += 25){
+			for (var j = target.y - radius; j < target.y + radius; j += 25) {
+				var cell = this.xyToCell(i, j);
+				if (cell) {
+					cell.frame = 1;
+				}
+			}
+		}
+	}
+
+	update() {
+		var player:Player = Darkness.player;
+
+		for (var i = 0; i < this.cells.length; i++) {
+			for (var j = 0; j < this.cells.length; j++) {
+				this.cells[i][j].frame = 0;
+			}
+		}
+
+		this.raycastAround(Darkness.player);
+
+		for (var i = 0; i < Darkness.lightbearers.length; i++) {
+			var p:Probe = Darkness.lightbearers[i];
+			if (!p.inInventory) {
+				this.raycastAround(Darkness.lightbearers[i]);
+			}
 		}
 	}
 }
@@ -310,6 +390,7 @@ class Probe extends Entity {
 		var p:Probe = new Probe(game, x, y, dx, dy, Probe.probesActive++);
 
 		Probe.existingProbes.push(p);
+		Darkness.addProbe(p);
 		return p;
 	}
 

@@ -10,7 +10,7 @@ LD29
 
 
  ☐ Get controls working solidly.
- ☐ Shoot a proble.
+ ✔ Shoot a proble. @done (14-04-26 18:14)
    ✔ Need to have more refined collision typez. @done (14-04-26 13:30)
    nope
    ✔ Need gravity. @done (14-04-26 13:30)
@@ -26,6 +26,7 @@ LD29
  ☐ Switch to a probe's perspective.
     ☐ Probes have limited energy and motion.
     ☐ It's annoying code-wise that you can drop and pickup probles.
+    ☐ Refactor: Probes need to always exist, they just need to have a 'non-deployed' state.
  ☐ Probles need to collide with each other.
  ☐ Probles randomly don't shoot.
  ☐ Pick up probes on de ground.

@@ -31,6 +31,7 @@ class MainState extends Phaser.State {
 		this.load.spritesheet("block","assets/block.png",25,25,1,0,0);
 		this.load.spritesheet("probe","assets/probe.png",25,25,1,0,0);
 		this.load.spritesheet("hud-probe","assets/hud-probe-indicator.png",25,25,4,0,0);
+		this.load.image("energybar", "assets/energybar.png");
 		this.load.image("hud-msg-a","assets/msgA.png");
 		this.load.image("hud-msg-s","assets/msgS.png");
 		this.load.image("hud-msg-d","assets/msgD.png");
@@ -197,6 +198,7 @@ class DialogObserver {
 class Probe extends Entity {
 	dx:number = 0;
 	dy:number = 0;
+	energy:number = 100;
 
 	static MAX_PROBES:number = 3;
 	static probesActive:number = 0;
@@ -242,12 +244,43 @@ class Probe extends Entity {
 
 		if (MainState.getMainState(this.game).currentFocus != this) return;
 
-		if (keyboard.isDown(Phaser.Keyboard.LEFT)) {
+		if (keyboard.isDown(Phaser.Keyboard.LEFT) && this.energy > 0) {
 			this.body.velocity.x = -300;
-		} else if (keyboard.isDown(Phaser.Keyboard.RIGHT)) {
+			this.energy -= 3;
+		} else if (keyboard.isDown(Phaser.Keyboard.RIGHT) && this.energy > 0) {
 			this.body.velocity.x = 300;
+			this.energy -= 3;
 		} else {
 			this.body.velocity.x = 0;
+		}
+	}
+}
+
+class Bar extends Phaser.Sprite {
+	static BAR_WIDTH:number = 100;
+
+	barValue:number;
+	barMaxValue:number;
+
+	constructor(game:Phaser.Game, value:number, maxValue:number) {
+		super(game, 0, 0, "energybar");
+
+		this.barMaxValue = maxValue;
+		this.setValue(value);
+	}
+
+	setValue(width:number) {
+		if (width != this.barValue) {
+			if (width <= 0) {
+				this.visible = false;
+				return;
+			}
+			
+			this.visible = true;
+			this.barValue = width;
+			var cropWidth = (Bar.BAR_WIDTH * (this.barValue / this.barMaxValue));
+			var crop:Phaser.Rectangle = new Phaser.Rectangle(0, 0, cropWidth, 10);
+			this.crop(crop);
 		}
 	}
 }
@@ -261,6 +294,7 @@ class ProbeIndicator extends Phaser.Sprite {
 	happinessLevel:number = 0;
 	probe:Probe = null;
 	msg:Phaser.Sprite;
+	energybar: Bar;
 
 	constructor(game:Phaser.Game, which:number, happiness:number = 0) {
 		super(game, 25 + which * 30, 25, "hud-probe", happiness);
@@ -269,10 +303,18 @@ class ProbeIndicator extends Phaser.Sprite {
 
 		this.msg = game.add.sprite(25, -25, "hud-msg-a");
 		this.addChild(this.msg);
+
+		this.energybar = new Bar(this.game, 100, 100);
+		this.addChild(this.energybar);
+		this.energybar.x = 0;
+		this.energybar.y = 30;
 	}
 
 	update() {
-		this.msg.visible = this.happinessLevel != ProbeIndicator.HIDDEN;
+		if (this.probe) { // TODO refactor
+			this.msg.visible = this.happinessLevel != ProbeIndicator.HIDDEN;
+			this.energybar.setValue(this.probe.energy);
+		}
 	}
 }
 

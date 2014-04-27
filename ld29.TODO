@@ -15,6 +15,14 @@ LD29
    nope
    ✔ Need gravity. @done (14-04-26 13:30)
  ☐ HUD for probes left.
+ ☐ Show dialog: "you don't have any more probes!"
+   ☐ Block all other events.
+   ✔ Do a whole array. @done (14-04-26 17:11)
+   ☐ Typewritur.
+   ☐ Needs better font...
+ ☐ Switch to a probe's perspective.
+ ☐ Probles need to collide with each other.
+ ☐ Probles randomly don't shoot.
  ☐ Pick up probes on de ground.
  ☐ Darkness and light...
  ☐ Look into shadows for glowing...ness

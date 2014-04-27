@@ -19,13 +19,17 @@ class MainState extends Phaser.State {
 
 	groups: {[key: string]: Phaser.Group} = {};
 
+	static getMainState(game:Phaser.Game):MainState {
+		return <MainState> game.state.getCurrentState();
+	}
+
 	public preload():void {
+		this.load.image("dialog", "assets/dialog.png");
 		this.load.spritesheet("player","assets/player.png",25,25,1,0,0);
 		this.load.spritesheet("block","assets/block.png",25,25,1,0,0);
 		this.load.spritesheet("probe","assets/probe.png",25,25,1,0,0);
 		this.load.spritesheet("hud-probe","assets/hud-probe-indicator.png",25,25,4,0,0);
 		this.load.tilemap("map", "assets/map.json", null, Phaser.Tilemap.TILED_JSON);
-
 	}
 
 	public init():void {
@@ -54,6 +58,10 @@ class MainState extends Phaser.State {
 		this.camera.follow(this.p);
 
 		this.hud = new HUD(this.game);
+
+		var d:DialogBox = new DialogBox(this.game, ["test lal aladsldlasldalsdlasdll", "test2"]);
+		this.game.add.existing(d);
+
 	}
 
 	public update():void {
@@ -69,6 +77,9 @@ class MainState extends Phaser.State {
 		var mapY:number = Math.floor(this.p.y / SCREEN_HEIGHT) * SCREEN_HEIGHT;
 
 		this.game.world.setBounds(mapX, mapY, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+		this.hud.update();
+
 	}
 }
 
@@ -89,6 +100,58 @@ class Entity extends Phaser.Sprite {
 		}
 
 		currentState.groups[superclassName].add(this);
+	}
+}
+
+class DialogBox extends Phaser.Sprite {
+	static DIALOG_WIDTH:number = 400;
+	static DIALOG_HEIGHT:number = 200;
+
+	text:Phaser.Text;
+	dialog:string[];
+
+	currentText:string = ""; // entire text (not all may be visible)
+	shownTextLength:number = 0;
+	ticks:number = 0;
+
+	constructor(game:Phaser.Game, dialog:string[]) {
+		super(game, 300, 200, "dialog", 0);
+
+		this.fixedToCamera = true;
+		this.dialog = dialog;
+
+		var wordWrapWidth = DialogBox.DIALOG_WIDTH - 10 * 2;
+	    var style = { wordWrapWidth:wordWrapWidth, font: "15px Arial", wordWrap: true, fill: "#000000" };
+		this.text = new Phaser.Text(game, 10, 10, "", style);
+
+		this.addChild(this.text);
+
+		var pressXText = new Phaser.Text(game, DialogBox.DIALOG_WIDTH - 100, DialogBox.DIALOG_HEIGHT - 20, "Press X", {fill: "#000000", font: "15px Arial", align: "right", wordWrapWidth: 100});
+		this.addChild(pressXText);
+
+		var advanceButton = game.input.keyboard.addKey(Phaser.Keyboard.X);
+		advanceButton.onDown.add(this.advanceText, this);
+
+		this.advanceText();
+	}
+
+	advanceText() {
+		if (this.dialog.length == 0) {
+			this.destroy(true);
+		} else if (this.shownTextLength >= this.currentText.length) {
+			this.currentText = this.dialog.shift();
+			this.shownTextLength = 0;
+			this.text.text = "";
+		}
+	}
+
+	update() {
+		++this.ticks;
+
+		if (this.shownTextLength < this.currentText.length && (this.ticks % 5 == 0 || this.game.input.keyboard.justPressed(Phaser.Keyboard.X))) {
+			this.shownTextLength++;
+			this.text.text = this.currentText.substring(0, this.shownTextLength);
+		}
 	}
 }
 
@@ -146,10 +209,10 @@ class Probe extends Entity {
 		this.body.velocity.x = dx * 200;
 		this.body.velocity.y = -100 + dy * 500;
 
-		console.log("new Proble! " + probeId);
-
 		this.x = x;
 		this.y = y;
+
+		MainState.getMainState(game).hud.signal(HUD.NEW_PROBLE, this);
 	}
 
 	update() {
@@ -170,6 +233,7 @@ class ProbeIndicator extends Phaser.Sprite {
 	static HIDDEN:number = 3;
 
 	happinessLevel:number = 0;
+	probe:Probe = null;
 
 	constructor(game:Phaser.Game, which:number, happiness:number = 0) {
 		super(game, 25 + which * 30, 25, "hud-probe", happiness);
@@ -182,6 +246,7 @@ class ProbeList {
 	contents:Phaser.Group;
 	game:Phaser.Game;
 	probesOwned:number = 1;
+	probesActive:number = 0;
 	orderedProbeList:ProbeIndicator[] = [];
 
 	constructor(game:Phaser.Game) {
@@ -203,15 +268,38 @@ class ProbeList {
 			this.orderedProbeList[i].visible = true;
 		}
 	}
+
+	addAliveProble(newProbe:Probe) {
+		this.orderedProbeList[this.probesActive].frame = ProbeIndicator.HAPPY;
+		this.orderedProbeList[this.probesActive].probe = newProbe;
+	}
+
+	update() {
+		for (var i = 0; i < this.orderedProbeList.length; i++) {
+			// TODO figure out happiness...
+		}
+	}
 }
 
 class HUD {
 	game:Phaser.Game;
 	probeList:ProbeList;
 
+	static NEW_PROBLE:number = 0;
+
 	constructor(game:Phaser.Game) {
 		this.game = game;
 		this.probeList = new ProbeList(game);
+	}
+
+	signal(val:number, extra:any) {
+		if (val == HUD.NEW_PROBLE) {
+			this.probeList.addAliveProble(<Probe> extra);
+		}
+	}
+
+	update() {
+		this.probeList.update();
 	}
 
 	addProbeIndicators() {

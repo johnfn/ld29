@@ -424,7 +424,7 @@ class DialogBox extends Phaser.Sprite {
 	}
 
 	advanceText() {
-		if (this.dialog.length == 0) {
+		if (this.dialog.length == 0 && this.shownTextLength >= this.currentText.length) {
 			this.destroy(true);
 		} else if (this.shownTextLength >= this.currentText.length) {
 			this.currentText = this.dialog.shift();

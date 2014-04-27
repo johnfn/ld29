@@ -16,6 +16,7 @@ class MainState extends Phaser.State {
 
 	trees:Phaser.TilemapLayer;
 	background:Phaser.TilemapLayer;
+	target:Target;
 
 	currentFocus:Entity;
 
@@ -32,6 +33,7 @@ class MainState extends Phaser.State {
 		this.load.spritesheet("probe","assets/probe.png",25,25,1,0,0);
 		this.load.spritesheet("hud-probe","assets/hud-probe-indicator.png",25,25,5,0,0);
 		this.load.image("energybar", "assets/energybar.png");
+		this.load.image("target", "assets/target.png");
 		this.load.image("hud-msg-a","assets/msgA.png");
 		this.load.image("hud-msg-s","assets/msgS.png");
 		this.load.image("hud-msg-d","assets/msgD.png");
@@ -63,13 +65,16 @@ class MainState extends Phaser.State {
 
 		this.game.add.existing(this.p);
 		this.hud = new HUD(this.game);
+		this.target = new Target(this.game);
+
+		this.game.add.existing(this.target);
 
 		this.currentFocus = this.p;
 	}
 
 	public update():void {
 		this.game.physics.arcade.collide(this.p, this.walls);
-		this.camera.follow(this.currentFocus);
+		this.camera.follow(this.currentFocus, Phaser.Camera.FOLLOW_PLATFORMER);
 
 		if (this.groups["Probe"]) {
 			var probes:Phaser.Group = this.groups["Probe"]
@@ -109,6 +114,34 @@ class MainState extends Phaser.State {
 		if (this.game.input.keyboard.isDown(Phaser.Keyboard.C)) {
 			this.currentFocus = this.p;
 		}
+	}
+}
+
+class Target extends Phaser.Sprite {
+	currentTarget:Phaser.Sprite;
+	ticks:number = 0;
+	game:Phaser.Game;
+
+	constructor(game:Phaser.Game) {
+		super(game, 0, 0, "target", 0);
+
+		this.game = game;
+		this.anchor.x = 0.5;
+		this.anchor.y = 0.5;
+
+		this.scale.x = 1.5;
+		this.scale.y = 1.5;
+	}
+
+	update() {
+		this.ticks += 0.03;
+
+		this.rotation = this.ticks;
+
+		this.currentTarget = MainState.getMainState(this.game).currentFocus;
+
+		this.x = this.currentTarget.x + 12;
+		this.y = this.currentTarget.y + 12;
 	}
 }
 

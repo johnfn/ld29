@@ -9,9 +9,11 @@ LD29
    ☐ Game where you can send out little fire probes that will illuminate torches. You can go pick them up and re-ammo yourself. Also, they have rudimentary controls ,l/r for like 50 energy. When you switch into ones perspective you get like b/w stuff.
 
  ☐ Get controls working solidly.
+ ☐ Fix probe pickup.
+ ☐ HUD should only say "C" if you're not focued on him. 
  ✔ Darkness crashes when ppl go off side. @done (14-04-27 11:39)
  ✔ Darkness needs to work for levels aside from the first one. @done (14-04-27 12:59)
- ☐ Dialog when entering rooms.
+ ✔ Dialog when entering rooms. @done (14-04-27 13:22)
  ☐ 3 different probes
    ☐ Normal derpy one
    ☐ 4-arrow flying one

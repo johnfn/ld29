@@ -500,8 +500,6 @@ class Probe extends Entity {
 		var pickedUp:boolean = false;
 		var result:Probe[] = [];
 
-		// see if we can find a probe to pick up first.
-
 		for (var i = 0; i < Probe.existingProbes.length; i++) {
 			var p:Probe = Probe.existingProbes[i];
 
@@ -543,6 +541,7 @@ class Probe extends Entity {
 	pickup() {
 		this.inInventory = true;
 		this.exists = false;
+		this.energy = 100;
 	}
 
 	constructor(game:Phaser.Game, x:number, y:number, dx:number, dy:number, probeId:number) {
@@ -634,15 +633,24 @@ class Bar extends Phaser.Sprite {
 
 class YouIndicator extends Phaser.Sprite {
 	msg:Phaser.Sprite;
+	game:Phaser.Game;
 
 	constructor(game:Phaser.Game) {
 		super(game, 25, 25, "hud-probe", 4);
 
+		this.game = game;
 		this.msg = new Phaser.Sprite(game, 25, -25, "hud-msg-c");
 		this.addChild(this.msg);
 		game.add.existing(this);
 
 		this.fixedToCamera = true;
+	}
+
+	update() {
+		var focus:Phaser.Sprite = MainState.getMainState(this.game).currentFocus;
+		var you:Player = MainState.getMainState(this.game).p;
+
+		this.msg.visible = (focus != you);
 	}
 }
 
@@ -660,6 +668,9 @@ class ProbeIndicator extends Phaser.Sprite {
 	energybar: Bar;
 	which:number;
 
+	normalTexture:string;
+	currentTexture:string = "";
+
 	constructor(game:Phaser.Game, which:number, probe:Probe) {
 		super(game, 125 + which * ProbeIndicator.WIDTH, 25, "hud-probe", 3);
 
@@ -668,8 +679,10 @@ class ProbeIndicator extends Phaser.Sprite {
 		this.happinessLevel = ProbeIndicator.HIDDEN;
 
 		var whichMsg:string = ["a", "s", "d"][this.which];
+		this.normalTexture = "hud-msg-" + whichMsg;
+		this.msg = game.add.sprite(25, -25, this.normalTexture);
+		this.swapMsg(this.normalTexture);
 
-		this.msg = game.add.sprite(25, -25, "hud-msg-" + whichMsg);
 		this.addChild(this.msg);
 
 		this.energybar = new Bar(this.game, 100, 100);
@@ -678,8 +691,18 @@ class ProbeIndicator extends Phaser.Sprite {
 		this.energybar.y = 30;
 	}
 
+	swapMsg(newTexture:string) {
+		if (this.currentTexture != newTexture) {
+			this.currentTexture = newTexture;
+
+			this.msg.loadTexture(newTexture, 0);
+		}
+	}
+
 	update() {
-		this.msg.visible = !this.probe.inInventory;
+		var focus:Phaser.Sprite = MainState.getMainState(this.game).currentFocus;
+
+		this.msg.visible = !this.probe.inInventory && (focus != this.probe);
 		this.energybar.visible = !this.probe.inInventory;
 		this.energybar.setValue(this.probe.energy);
 
@@ -690,7 +713,9 @@ class ProbeIndicator extends Phaser.Sprite {
 		}
 
 		if (this.probe.energy <= 0) {
-			this.msg.loadTexture("hud-msg-zzz", 0);
+			this.swapMsg("hud-msg-zzz");
+		} else {
+			this.swapMsg(this.normalTexture);
 		}
 	}
 }
